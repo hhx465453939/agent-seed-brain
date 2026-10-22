@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Python 3.9 兼容**：`Path.write_text(newline=...)` 的 `newline` 参数是 3.10 才引入的，
+  在 3.9 上抛 `TypeError`。影响面不止 `build` —— `pick`（写 state）与
+  `verify --evidence`（写 Markdown）同样会炸，三条主路径在 3.9 上全不可用。
+  统一改为 `Path.open(newline="\n")` + `write()`：3.9 支持，且保留显式 LF 语义，
+  跨平台幂等不受影响。由 CI 的 `py3.9 / ubuntu-latest` 矩阵抓到。
+
 ## [0.1.0] - 2026-10-22
 
 首个公开版本。把「种子大脑」从两个领域仓库里的复制粘贴脚本，抽成领域无关的 SDK。

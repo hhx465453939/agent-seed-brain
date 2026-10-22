@@ -8,6 +8,10 @@ Thanks for wanting to make retrieval less biased. This project is deliberately s
 2. **Determinism is a feature.** No `random`, no built-in `hash()` (it is salted per process — use `hashlib`). Same input must yield byte-identical output.
 3. **Every new behaviour needs an assertion.** If you add a mechanism, add a check in `src/seedbrain/verify.py` that can actually fail. A check that can never fail is worse than no check.
 4. **No content, only rules.** `profiles/*.json` may contain parsing rules and quotas. It must not contain curated seed entries from upstream corpora.
+5. **Python 3.9 is the floor.** No 3.10+ stdlib APIs — e.g. `Path.write_text(newline=...)`,
+   `str.removeprefix`, structural `match`, or `X | Y` in runtime-evaluated positions.
+   Type annotations are exempt: every module uses `from __future__ import annotations`.
+   Passing locally on 3.13 does **not** mean it passes on 3.9; CI runs the full matrix.
 
 ## Development setup
 

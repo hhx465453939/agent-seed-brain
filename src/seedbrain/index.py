@@ -89,7 +89,10 @@ def write(prof: Profile, seeds: list[Seed], result: BuildResult) -> tuple[Path, 
         for s in seeds:
             f.write(json.dumps(s.to_dict(), ensure_ascii=False) + "\n")
 
-    md.write_text(_render_flat(prof, seeds, result), encoding="utf-8", newline="\n")
+    # Path.write_text 的 newline 参数是 Python 3.10+ 才有的；本项目声明 3.9+，
+    # 所以统一用 Path.open(newline="\n")——既可跨版本，又强制 LF（保证跨平台幂等）。
+    with md.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(_render_flat(prof, seeds, result))
     return jsonl, md
 
 

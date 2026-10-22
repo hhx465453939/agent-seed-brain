@@ -37,8 +37,9 @@ def load(prof: Profile) -> dict:
 def save(prof: Profile, state: dict) -> Path:
     path = state_path(prof)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n",
-                    encoding="utf-8", newline="\n")
+    # write_text(newline=) 是 Python 3.10+；用 Path.open 兼容 3.9，并强制 LF。
+    with path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(state, ensure_ascii=False, indent=2) + "\n")
     return path
 
 

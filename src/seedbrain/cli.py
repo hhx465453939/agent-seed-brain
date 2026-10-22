@@ -153,7 +153,9 @@ def cmd_verify(args: argparse.Namespace) -> int:
     if args.evidence:
         path = Path(args.evidence)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(_render_evidence(brain, report), encoding="utf-8", newline="\n")
+        # write_text(newline=) 是 Python 3.10+；用 Path.open 兼容 3.9。
+        with path.open("w", encoding="utf-8", newline="\n") as f:
+            f.write(_render_evidence(brain, report))
         _out(f"\n✓ evidence 已写入 {path}")
 
     if args.json:
