@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-22
+
+### Fixed
+
+- **card 层名字解析**：`_clean()` 的 docstring 写着「去掉 emoji」，实现里却没有 emoji 正则。
+  卡片 H1 形如 `🧮 code-recipe · 01 线性代数与矩阵分解`，按 `·` 切出的第一段是
+  `🧮 code-recipe`，与 `template_parts` 里的 `code-recipe` 不相等 → 模板段过滤失效 →
+  种子名字变成 `🧮 code-recipe`。在数学域 204 粒中造成 9 粒「用名字召回失败」。
+- **T2a / T11a 的统计口径**：单字名（如「群」）在 2-gram 方案下 `grams()` 为空，
+  用名字召回是不可能的。现在排除出分母并在 metric 里报出排除数——降门槛或隐短样本都是放水。
+
+### Verified
+
+三域实测：example 28/28；数学 28/28（T2a 95.1% → 100%，排除 1 个单字名）；
+美学 28/28（T2a 98.9% → 100%，T9 去中心化 75%）。
+
+## [0.1.0] - 2026-10-22
+
 ### Fixed
 
 - **Python 3.9 兼容**：`Path.write_text(newline=...)` 的 `newline` 参数是 3.10 才引入的，
@@ -14,8 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `verify --evidence`（写 Markdown）同样会炸，三条主路径在 3.9 上全不可用。
   统一改为 `Path.open(newline="\n")` + `write()`：3.9 支持，且保留显式 LF 语义，
   跨平台幂等不受影响。由 CI 的 `py3.9 / ubuntu-latest` 矩阵抓到。
-
-## [0.1.0] - 2026-10-22
 
 首个公开版本。把「种子大脑」从两个领域仓库里的复制粘贴脚本，抽成领域无关的 SDK。
 

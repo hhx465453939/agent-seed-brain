@@ -177,9 +177,15 @@ class CheckSuite:
 
     def check_recall(self, r: VerifyReport) -> None:
         k = 8
-        miss_name = [s.id for s in self.seeds if s.id not in self._rank_ids(s.name, k)]
-        acc_n = 1 - len(miss_name) / max(1, len(self.seeds))
-        self._add(r, "T2a", f"名字自召回@{k}", f"{acc_n:.1%}（漏 {len(miss_name)}）",
+        # 单字名（如「群」）在 2-gram 方案下 grams() 为空，用名字召回是**不可能**的。
+        # 把它排除出分母并在 metric 里报出——降门槛或隐短样本都是放水。
+        probeable = [s for s in self.seeds if grams(s.name)]
+        skipped = len(self.seeds) - len(probeable)
+        miss_name = [s.id for s in probeable if s.id not in self._rank_ids(s.name, k)]
+        acc_n = 1 - len(miss_name) / max(1, len(probeable))
+        note = f"，排除 {skipped} 个单字名" if skipped else ""
+        self._add(r, "T2a", f"名字自召回@{k}",
+                  f"{acc_n:.1%}（漏 {len(miss_name)}/{len(probeable)}{note}）",
                   f">= {self.th['recall_name']:.0%}", acc_n >= self.th["recall_name"])
 
         miss_feat = []
@@ -429,8 +435,11 @@ class CheckSuite:
         for batch in batches:
             cur, _ = merge_seeds(cur, batch, self.prof)
             cur_idf = build_idf(cur)
-            hit = sum(1 for s in batch if s.id in self._rank_ids(s.name, 8, seeds=cur, idf=cur_idf))
-            recalls.append(hit / max(1, len(batch)))
+            # 同 T2a：单字名的 2-gram 为空，用它做探针永远召不回，排除出分母。
+            probeable = [s for s in batch if grams(s.name)]
+            hit = sum(1 for s in probeable
+                      if s.id in self._rank_ids(s.name, 8, seeds=cur, idf=cur_idf))
+            recalls.append(hit / max(1, len(probeable)))
             if probes:
                 counts: Counter = Counter()
                 for p in probes[:12]:

@@ -179,15 +179,25 @@ def _parse_cards(prof: Profile, src: Source) -> list[Seed]:
 
 _MD_BOLD = None
 _MD_LINK = None
+_EMOJI = None
 
 
 def _clean(text: str) -> str:
-    """去掉 markdown 标记与 emoji，压平空白。"""
-    global _MD_BOLD, _MD_LINK
+    """去掉 markdown 标记与行首 emoji，压平空白。
+
+    行首 emoji 必须先剥：卡片 H1 形如 ``🧮 code-recipe · 01 线性代数与矩阵分解``，
+    若不剥离，按 ``·`` 切出的第一段是 ``🧮 code-recipe``，与 ``template_parts``
+    里的 ``code-recipe`` 不相等 → 模板段过滤失效 → 种子名字变成
+    ``🧮 code-recipe``，用名字召回必然失败（实测 math 域 9/204 粒因此漏召回）。
+    """
+    global _MD_BOLD, _MD_LINK, _EMOJI
     if _MD_BOLD is None:
         import re
         _MD_BOLD = re.compile(r"\*\*(.+?)\*\*")
         _MD_LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+        # 盖 emoji 主体、变体选择符（U+FE0F）与零宽连接符（U+200D）
+        _EMOJI = re.compile(r"^[\U0001F300-\U0001FAFF\u2600-\u27BF\uFE0F\u200D]+\s*")
+    text = _EMOJI.sub("", text)
     text = _MD_LINK.sub(r"\1", text)
     text = _MD_BOLD.sub(r"\1", text)
     text = text.replace("`", "").strip()
