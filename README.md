@@ -48,6 +48,73 @@
 
 ---
 
+## 安装
+
+**① 从源码（当前可用，无需等 PyPI）**
+
+```bash
+git clone https://github.com/hhx465453939/agent-seed-brain
+cd agent-seed-brain
+pip install -e .
+seedbrain --version
+```
+
+**② 从 PyPI（v0.1.0 发布后）**
+
+```bash
+pip install agent-seed-brain
+```
+
+> 发布由 `.github/workflows/release.yml` 完成（Trusted Publishing / OIDC，不需要 API token）。
+> 维护者先在 PyPI 配好 trusted publisher，再手动跑一次该 workflow；推 `v*` tag 只做验证与构建，
+> 不会自动发布。
+
+**③ 零安装试用**
+
+```bash
+git clone https://github.com/hhx465453939/agent-seed-brain
+cd agent-seed-brain
+PYTHONPATH=src python examples/minimal.py
+```
+
+---
+
+## 部署到 agent harness
+
+`seedbrain` 是**库 + CLI**，不绑定任何 harness。两种接法：
+
+**A. 当作命令行工具（最常见）**
+
+在 agent 的规则文件里加一句「选方案前先跑 `seedbrain match`」，它就会在执行前查库：
+
+```bash
+seedbrain match "科技感长图，深色底霓虹" \
+  --profile profiles/taste.json \
+  --root ~/agent-taste-seed-system \
+  --k 8
+```
+
+**B. 当作库嵌入自建循环**
+
+```python
+from seedbrain import SeedBrain
+
+brain = SeedBrain.load("profiles/taste.json", root="~/agent-taste-seed-system")
+for m in brain.match(task, k=8):
+    ...
+```
+
+**接上已有的知识库（SDK 与内容分离）**
+
+```bash
+seedbrain build  --profile profiles/taste.json --root ~/agent-taste-seed-system
+seedbrain verify --profile profiles/taste.json --root ~/agent-taste-seed-system
+```
+
+`--root` 指向**内容所在的仓库**。SDK 仓库里只有解析规则，不含任何种子内容——这是许可隔离的前提。
+
+---
+
 ## 30 秒
 
 ```bash

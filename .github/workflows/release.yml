@@ -1,0 +1,84 @@
+name: Release
+
+# 触发：推送 v* 标签（如 v0.1.0）
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ── 闸门：发布前必须先在 tag 上跑一遍完整验证 ──────────────────────
+  verify:
+    name: 发布前验证
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 安装并断言零运行时依赖
+        run: |
+          python -m pip install --upgrade pip setuptools
+          python -m pip install -e .
+          python -c "import importlib.metadata as m,sys; r=[x for x in (m.requires('agent-seed-brain') or []) if 'extra ==' not in x]; print('runtime deps =', r or '[]'); sys.exit(1 if r else 0)"
+      - name: 测试与断言
+        run: |
+          python -m unittest discover -s tests
+          python -m seedbrain.cli build --profile profiles/example.json
+          git diff --exit-code -- tests/fixtures/mini-domain/
+          python -m seedbrain.cli verify --profile profiles/example.json
+
+  build:
+    name: 构建 sdist + wheel
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 构建
+        run: |
+          python -m pip install --upgrade pip build twine
+          python -m build
+          python -m twine check dist/*
+      - name: 校验产物里带上了许可与声明
+        run: |
+          python - <<'PY'
+          import tarfile, pathlib, sys
+          sdist = next(pathlib.Path("dist").glob("*.tar.gz"))
+          names = tarfile.open(sdist).getnames()
+          need = ["LICENSE", "NOTICE", "README.md", "pyproject.toml"]
+          missing = [n for n in need if not any(x.endswith("/" + n) or x == n for x in names)]
+          print("sdist 文件数:", len(names))
+          print("缺失:", missing or "无")
+          sys.exit(1 if missing else 0)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # ── 发布：PyPI Trusted Publishing（OIDC，不需要 API token）──────────
+  # 只在手动触发时发布。推 tag 只做 verify + build，不碰 PyPI ——
+  # 否则 PyPI 尚未配置 trusted publisher 时会白白产生一条失败记录。
+  publish:
+    name: 发布到 PyPI
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/agent-seed-brain
+    permissions:
+      id-token: write   # OIDC，供 pypa/gh-action-pypi-publish 换取短期令牌
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
