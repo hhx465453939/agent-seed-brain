@@ -1,0 +1,36 @@
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+src/*.egg-info/
+.venv/
+venv/
+
+# ── 测试与工具缓存 ──────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# ── 编辑器 / 系统 ───────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ── 种子大脑运行时状态（使用历史因人而异，不入库）──────
+# 派生索引（seed-index.jsonl / SEED-INDEX.md）**要入库**：不跑脚本也能读。
+# 但「谁用过什么」是本地历史，提交会让每次 pick 都产生噪声 diff。
+.seed-usage.json
+**/.seed-usage.json
+
+# ── 本地试验残留 ────────────────────────────────────────
+/tmp-*/
+*.bak-*

@@ -1,0 +1,79 @@
+{
+  "_comment": [
+    "美学大脑（agent-taste-seed-system）的解析规则。",
+    "本文件只含【如何解析】的规则与分层配额，不含任何种子内容。",
+    "用法：seedbrain build --profile <本文件> --root <agent-taste-seed-system 仓库路径>",
+    "上游种子文本为 CC BY-NC-SA 4.0，不在本仓库分发。"
+  ],
+  "schema_version": 1,
+  "name": "taste",
+  "label": "美学种子大脑",
+  "sources": [
+    {
+      "kind": "table",
+      "path": "references/art-seeds.md",
+      "layer": "chapter",
+      "group_re": "^##\\s+(?P<group>[^#].*)$",
+      "entry_re": "^🎨\\s*\\*\\*(?P<name>[^*]+?)\\*\\*\\s*(?:（(?P<years>[^）]*)）)?\\s*·?\\s*(?P<tag>[^—]*?)\\s*——\\s*(?P<desc>.+)$",
+      "aux_re": "^`AI:\\s*(?P<kw>.+?)`$"
+    },
+    {
+      "kind": "card",
+      "dir": "references/code-genes",
+      "layer": "code-gene",
+      "title_re": "^#\\s+(?P<title>.+)$",
+      "field_re": "^>\\s*\\*\\*(?P<key>[^*]+?)\\*\\*\\s*[（(]?[^：:）)]*[）)]?\\s*[：:]\\s*(?P<val>.*)$",
+      "list_re": "^>\\s*(?:[-*]|\\d+\\.)\\s+(?P<item>.+)$",
+      "template_parts": ["code-gene", "code gene"]
+    },
+    {
+      "kind": "card",
+      "dir": "references/moods",
+      "layer": "mood",
+      "title_re": "^#\\s+(?P<title>.+)$",
+      "field_re": "^>\\s*\\*\\*(?P<key>[^*]+?)\\*\\*\\s*[（(]?[^：:）)]*[）)]?\\s*[：:]\\s*(?P<val>.*)$",
+      "list_re": "^>\\s*(?:[-*]|\\d+\\.)\\s+(?P<item>.+)$",
+      "template_parts": ["情绪选种档案", "情绪档"]
+    }
+  ],
+  "layers": {
+    "chapter": { "prefix": "ch", "quota": 0.42, "label": "风格章档" },
+    "code-gene": { "prefix": "cg", "quota": 0.33, "label": "代码基因卡" },
+    "mood": { "prefix": "md", "quota": 0.25, "label": "情绪档" }
+  },
+  "paths": {
+    "index_jsonl": "references/seed-index.jsonl",
+    "index_md": "references/SEED-INDEX.md",
+    "additions": "references/seed-additions.jsonl",
+    "state": "references/.seed-usage.json"
+  },
+  "norms": {
+    "decay_tau_days": 14.0,
+    "count_penalty": 0.5,
+    "max_hits": 5,
+    "gram_w2": 1.0,
+    "gram_w3": 0.35,
+    "dup_threshold": 0.75
+  },
+  "verify": {
+    "probes": [
+      "科技感长图，深色背景霓虹光效",
+      "东方古韵，留白和墨色层次",
+      "B 端数据看板，信息密度高，清晰理性",
+      "孤独诗意的散文配图，雾气弥漫",
+      "庄重典雅的展览折页，克制高级"
+    ],
+    "generic_fill": ["设计", "页面", "内容", "风格"],
+    "legacy_shelf": [],
+    "_legacy_shelf_hint": "把上游旧首选表的 id（如 cg-01-瑞士平面）填进来，T9「去中心化」断言才会生效；留空则自动跳过该项。",
+    "thresholds": {
+      "recall_name": 0.98,
+      "recall_feature": 0.6,
+      "gini_max": 0.8,
+      "idf_top1_gain": 0.15,
+      "layer_dominance_max": 0.7,
+      "rotation_min": 4,
+      "decenter_min": 0.5
+    }
+  }
+}

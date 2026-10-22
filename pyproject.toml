@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-seed-brain"
+version = "0.1.0"
+description = "Compile any domain into an unbiased, incrementally-updatable seed index for AI agents. Zero dependencies."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "CC-BY-NC-SA-4.0" }
+authors = [{ name = "hhx465453939" }]
+keywords = [
+    "ai-agents",
+    "llm-tooling",
+    "retrieval",
+    "unbiased-selection",
+    "knowledge-base",
+    "prompt-engineering",
+    "zero-dependencies",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: Free for non-commercial use",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Indexing",
+    "Typing :: Typed",
+]
+# 核心卖点：运行时零第三方依赖。请勿在此处添加任何包。
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hhx465453939/agent-seed-brain"
+Repository = "https://github.com/hhx465453939/agent-seed-brain"
+Issues = "https://github.com/hhx465453939/agent-seed-brain/issues"
+Changelog = "https://github.com/hhx465453939/agent-seed-brain/blob/main/CHANGELOG.md"
+
+[project.scripts]
+seedbrain = "seedbrain.cli:main"
+
+[project.optional-dependencies]
+# 仅开发期需要；运行时仍然零依赖。
+dev = ["pytest>=7", "pytest-cov", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+seedbrain = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "upstream: 用真实上游仓库跑回归（需本地存在，CI 默认跳过）",
+    "slow: 性能基准，默认跳过",
+]
+
+[tool.coverage.run]
+source = ["seedbrain"]
+branch = true
+
+[tool.ruff]
+target-version = "py39"
+line-length = 110
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]

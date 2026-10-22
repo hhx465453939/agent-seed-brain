@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ── 主矩阵：跨 Python 版本 + 跨平台 ────────────────────────────────
+  test:
+    name: py${{ matrix.python }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  python: "3.9" }
+          - { os: ubuntu-latest,  python: "3.10" }
+          - { os: ubuntu-latest,  python: "3.11" }
+          - { os: ubuntu-latest,  python: "3.12" }
+          - { os: ubuntu-latest,  python: "3.13" }
+          - { os: windows-latest, python: "3.11" }
+          - { os: macos-latest,   python: "3.11" }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: 安装（验证包可安装）
+        run: |
+          python -m pip install --upgrade pip setuptools
+          python -m pip install -e .
+
+      # 核心卖点，必须挡住任何偷偷加进来的依赖。
+      # 注意：extras（如 dev 的 pytest）不是运行时依赖，需按 `extra ==` 标记过滤，
+      # 否则会把合法的开发者依赖误判为运行时依赖。
+      - name: 断言零运行时依赖
+        run: |
+          python -c "import importlib.metadata as m,sys; r=[x for x in (m.requires('agent-seed-brain') or []) if 'extra ==' not in x]; print('runtime deps =', r or '[]'); sys.exit(1 if r else 0)"
+
+      - name: 断言索引与源文件同步（幂等）
+        run: |
+          python -m seedbrain.cli build --profile profiles/example.json
+          git diff --exit-code -- tests/fixtures/mini-domain/
+
+      - name: 单元与集成测试
+        run: python -m unittest discover -s tests
+
+      - name: 无偏分布断言
+        run: python -m seedbrain.cli verify --profile profiles/example.json
+
+  # ── 静态检查 ──────────────────────────────────────────────────────
+  lint:
+    name: ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip ruff
+      - run: ruff check src tests examples
+
+  # ── 反向守卫：不许把上游策展内容搬进来 ─────────────────────────────
+  # 引擎与语料同为 CC BY-NC-SA 4.0，但属两份独立版权客体。
+  # 混入一条批量条目会让再许可与商业授权的边界变得不可追溯，所以留最后一道防线。
+  # 白名单里的文件可以提到这些词：
+  #   README / CHANGELOG / NOTICE / CONTRIBUTING / docs —— 用于说明来源与边界
+  #   tasks/ —— 工程契约，记录决策与风险
+  #   profiles/ —— 只含【指向上游文件的路径】，是解析规则而非内容
+  license-guard:
+    name: 内容边界守卫
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 断言仓库内不含上游种子词
+        run: |
+          set +e
+          hits=$(grep -rIl -E "赛博霓虹|吉卜力|art-seeds|卡拉瓦乔" \
+                 --include="*.py" --include="*.json" --include="*.md" . \
+                 | grep -vE "^(\./)?(README\.md|CHANGELOG\.md|NOTICE|CONTRIBUTING\.md|docs/METHODOLOGY\.md|tasks/|profiles/)" )
+          set -e
+          if [ -n "$hits" ]; then
+            echo "::error::检测到疑似上游策展内容，请确认许可后移除："
+            echo "$hits"
+            exit 1
+          fi
+          echo "✓ 未在代码与数据文件中发现上游种子内容"

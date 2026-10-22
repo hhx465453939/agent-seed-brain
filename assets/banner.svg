@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="seed brain — compile any domain into an unbiased seed index for AI agents">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00E5C0"/>
+      <stop offset="100%" stop-color="#7B5CFF"/>
+    </linearGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#0A0A0A" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+    <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#0A0A0A" fill-opacity="0.18"/>
+    </pattern>
+  </defs>
+
+  <!-- 底：白 + 瑞士栅格 -->
+  <rect width="1200" height="320" fill="#FFFFFF"/>
+  <rect width="1200" height="320" fill="url(#grid)"/>
+
+  <!-- 右上：波普色块群 -->
+  <g>
+    <rect x="856" y="0" width="104" height="104" fill="#FFD400"/>
+    <rect x="960" y="0" width="240" height="56" fill="#00E5C0"/>
+    <rect x="960" y="56" width="120" height="48" fill="#FF2D78"/>
+    <rect x="1080" y="56" width="120" height="48" fill="#7B5CFF"/>
+    <rect x="856" y="104" width="344" height="24" fill="#0A0A0A"/>
+    <rect x="1044" y="128" width="156" height="88" fill="url(#dots)"/>
+  </g>
+
+  <!-- 左：主标 -->
+  <text x="56" y="150" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="96" font-weight="800" letter-spacing="-4" fill="#0A0A0A">seed</text>
+  <text x="56" y="238" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="96" font-weight="800" letter-spacing="-4" fill="url(#g1)">brain</text>
+
+  <!-- 标下细线 + 版本 -->
+  <rect x="56" y="258" width="360" height="4" fill="#0A0A0A"/>
+  <text x="56" y="286" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="17" font-weight="600" fill="#0A0A0A" letter-spacing="1">
+    COMPILE ANY DOMAIN → UNBIASED SEED INDEX
+  </text>
+
+  <!-- 右下：三枚胶囊 -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700">
+    <rect x="700" y="248" width="132" height="34" rx="17" fill="#0A0A0A"/>
+    <text x="719" y="271" fill="#00E5C0">zero deps</text>
+
+    <rect x="844" y="248" width="150" height="34" rx="17" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+    <text x="863" y="271" fill="#0A0A0A">python 3.9+</text>
+
+    <rect x="1006" y="248" width="138" height="34" rx="17" fill="#FFD400" stroke="#0A0A0A" stroke-width="2"/>
+    <text x="1025" y="271" fill="#0A0A0A">91 tests</text>
+  </g>
+
+  <!-- 左下：等距平铺的隐喻（一排等距小方块，最后一枚高亮） -->
+  <g>
+    <rect x="56" y="300" width="14" height="14" fill="#0A0A0A" fill-opacity="0.15"/>
+    <rect x="76" y="300" width="14" height="14" fill="#0A0A0A" fill-opacity="0.15"/>
+    <rect x="96" y="300" width="14" height="14" fill="#0A0A0A" fill-opacity="0.15"/>
+    <rect x="116" y="300" width="14" height="14" fill="#0A0A0A" fill-opacity="0.15"/>
+    <rect x="136" y="300" width="14" height="14" fill="#0A0A0A" fill-opacity="0.15"/>
+    <rect x="156" y="300" width="14" height="14" fill="#00E5C0"/>
+    <rect x="176" y="300" width="14" height="14" fill="#0A0A0A" fill-opacity="0.15"/>
+  </g>
+</svg>

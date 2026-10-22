@@ -1,0 +1,20 @@
+# sdist 内容清单。
+# 为什么不依赖 pyproject 的 license-files（PEP 639）：那是 setuptools>=77 才认的字段，
+# 而本项目声明支持 setuptools>=61。用 MANIFEST.in 兼容更广。
+include LICENSE
+include NOTICE
+include README.md
+include CHANGELOG.md
+include CONTRIBUTING.md
+include SECURITY.md
+include CODE_OF_CONDUCT.md
+include pyproject.toml
+
+recursive-include src/seedbrain py.typed
+recursive-include profiles *.json
+recursive-include docs *.md
+recursive-include examples *.py
+recursive-include tests *.py *.md *.jsonl
+
+# 不打包测试产物与本地状态
+global-exclude __pycache__/* *.py[cod] .seed-usage.json

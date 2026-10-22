@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "name": "example",
+  "label": "示例方法库",
+  "sources": [
+    {
+      "kind": "table",
+      "path": "tests/fixtures/mini-domain/tools.md",
+      "layer": "tool",
+      "group_re": "^##\\s+(?P<group>[^#].*)$",
+      "entry_re": "^-\\s*\\*\\*(?P<name>[^*]+?)\\*\\*\\s*·\\s*(?P<tag>[^—]+?)\\s*——\\s*(?P<desc>.+)$"
+    },
+    {
+      "kind": "card",
+      "dir": "tests/fixtures/mini-domain/cards",
+      "layer": "card",
+      "title_re": "^#\\s+(?P<title>.+)$",
+      "field_re": "^>\\s*\\*\\*(?P<key>[^*]+?)\\*\\*\\s*[：:]\\s*(?P<val>.*)$",
+      "list_re": "^>\\s*(?:[-*]|\\d+\\.)\\s+(?P<item>.+)$",
+      "template_parts": ["card"]
+    }
+  ],
+  "layers": {
+    "tool": { "prefix": "tl", "quota": 0.6, "label": "方法条目" },
+    "card": { "prefix": "cd", "quota": 0.4, "label": "专题卡" }
+  },
+  "paths": {
+    "index_jsonl": "tests/fixtures/mini-domain/seed-index.jsonl",
+    "index_md": "tests/fixtures/mini-domain/SEED-INDEX.md",
+    "additions": "tests/fixtures/mini-domain/seed-additions.jsonl",
+    "state": "tests/fixtures/mini-domain/.seed-usage.json"
+  },
+  "norms": {
+    "decay_tau_days": 14.0,
+    "count_penalty": 0.5,
+    "max_hits": 5,
+    "gram_w2": 1.0,
+    "gram_w3": 0.35,
+    "dup_threshold": 0.75
+  },
+  "verify": {
+    "probes": [
+      "降维压缩，矩阵分解选型",
+      "最短路径与连通分量",
+      "非平稳信号的时频分析",
+      "采样率不足导致混叠"
+    ],
+    "generic_fill": ["方法", "计算", "结果", "分析"],
+    "legacy_shelf": ["tl-矩阵分解", "tl-图遍历"],
+    "thresholds": {
+      "recall_name": 0.9,
+      "recall_feature": 0.6,
+      "gini_max": 0.8,
+      "idf_top1_gain": 0.1,
+      "layer_dominance_max": 0.7,
+      "rotation_min": 3,
+      "decenter_min": 0.3
+    }
+  }
+}
