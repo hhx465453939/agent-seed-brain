@@ -6,7 +6,13 @@ import unittest
 from pathlib import Path
 
 import helpers
-from seedbrain.profile import Profile, ProfileError, _deep_merge, _load_merged
+from seedbrain.profile import (
+    Profile,
+    ProfileError,
+    _apply_probes_ref,
+    _deep_merge,
+    _load_merged,
+)
 
 
 class _Base(unittest.TestCase):
@@ -211,6 +217,73 @@ class InheritanceTest(unittest.TestCase):
         self.assertEqual(p.verify.thresholds["recall_name"], 0.9)   # 覆盖
         self.assertEqual(p.verify.thresholds["gini_max"], 0.8)      # 继承
         self.assertEqual(p.verify.probes, ["甲"])                   # 替换
+
+
+class ProbesRefTest(unittest.TestCase):
+    """v0.3：probes_ref / builtin: 引用 —— 每个新行为都要有能失败的断言。"""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _pool(self, name, data):
+        p = self.tmp / name
+        p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        return p
+
+    def test_probes_ref_appends(self):
+        """池在前 + 本域在后（不是替换，也不是本域在前）。"""
+        self._pool("pool.json", ["a", "b", "c"])
+        out = _apply_probes_ref(
+            {"verify": {"probes_ref": "pool.json", "probes": ["x", "y"]}}, self.tmp)
+        self.assertEqual(out["verify"]["probes"], ["a", "b", "c", "x", "y"])
+        self.assertNotIn("probes_ref", out["verify"])
+        self.assertEqual(out["verify"]["_source"], {"ref": "pool.json", "pool": 3, "local": 2})
+
+    def test_probes_ref_missing_file(self):
+        with self.assertRaises(ProfileError) as ctx:
+            _apply_probes_ref({"verify": {"probes_ref": "nope.json"}}, self.tmp)
+        self.assertIn("不存在", str(ctx.exception))
+
+    def test_probes_ref_empty_pool(self):
+        """空池必须报错——不能静默跑出零探针的 verify。"""
+        self._pool("empty.json", [])
+        with self.assertRaises(ProfileError) as ctx:
+            _apply_probes_ref({"verify": {"probes_ref": "empty.json"}}, self.tmp)
+        self.assertIn("非空数组", str(ctx.exception))
+
+    def test_probes_ref_bad_json(self):
+        (self.tmp / "bad.json").write_text("{not json", encoding="utf-8")
+        with self.assertRaises(ProfileError) as ctx:
+            _apply_probes_ref({"verify": {"probes_ref": "bad.json"}}, self.tmp)
+        self.assertIn("不是合法 JSON", str(ctx.exception))
+
+    def test_probes_ref_absent_keeps_behaviour(self):
+        """回归：不用 probes_ref 时行为与 v0.2 完全一致。"""
+        out = _apply_probes_ref({"verify": {"probes": ["a"]}}, self.tmp)
+        self.assertEqual(out["verify"]["probes"], ["a"])
+        self.assertNotIn("_source", out["verify"])
+
+    def test_builtin_probes_ref_resolves(self):
+        """builtin: 必须能在包内找到（发布后 wheel 里也要有，见 package-data）。"""
+        out = _apply_probes_ref(
+            {"verify": {"probes_ref": "builtin:probes/core"}}, self.tmp)
+        self.assertGreaterEqual(len(out["verify"]["probes"]), 5)
+
+    def test_builtin_missing_raises(self):
+        with self.assertRaises(ProfileError) as ctx:
+            _apply_probes_ref({"verify": {"probes_ref": "builtin:probes/nope"}}, self.tmp)
+        self.assertIn("内置配置不存在", str(ctx.exception))
+
+    def test_profile_records_probe_source(self):
+        """`config --show` 靠 Profile.probes_source 报来源。"""
+        prof = Profile.load(helpers.EXAMPLE_PROFILE, root=helpers.ROOT)
+        self.assertEqual(prof.probes_source.get("pool"), 8)
+        self.assertEqual(prof.probes_source.get("local"), 4)
+        self.assertEqual(len(prof.verify.probes), 12)
 
 
 if __name__ == "__main__":

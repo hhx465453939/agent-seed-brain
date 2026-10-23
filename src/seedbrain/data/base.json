@@ -1,10 +1,8 @@
 {
   "_comment": [
-    "公共配置：所有领域 profile 的基础 defaults。",
-    "各领域用 \"extends\": \"base.json\" 继承，只写差异部分。",
-    "合并规则（固定，不可配置）：dict 递归合并；list 与标量整体替换。",
-    "为什么 list 替换而不合并：合并会让「想清空从 base 继承来的 probes/legacy_shelf」变成不可能。",
-    "查看合并结果：seedbrain config --show --profile <你的 profile>"
+    "SDK 内置的公共配置（随包分发，通过 \"extends\": \"builtin:base\" 引用）。",
+    "这是权威版本：profiles/base.json 已移除，避免两份副本漂移。",
+    "查看合并结果：seedbrain config --profile <你的 profile>"
   ],
   "schema_version": 1,
   "norms": {

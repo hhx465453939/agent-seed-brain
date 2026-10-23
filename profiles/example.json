@@ -1,13 +1,13 @@
 {
   "_comment": [
-    "最小可用示例域。用 extends 继承 base.json 的公共配置，只写差异：",
-    "  · sources / layers —— 本域特有",
-    "  · paths —— 输出到 tests/fixtures/（示例域不污染 references/）",
-    "  · verify.probes / generic_fill / legacy_shelf —— list 整体替换",
-    "  · verify.thresholds —— dict 递归合并（只覆盖 recall_name 一项）",
-    "查看合并结果：seedbrain config --show --profile profiles/example.json"
+    "最小可用示例域。",
+    "extends → \"builtin:base\"：公共 norms / paths / thresholds 来自 SDK 包内",
+    "  seedbrain/data/base.json（随版本走，零复制）。",
+    "probes_ref → \"builtin:probes/core\"：公共探针池（8 条通用任务）在前，",
+    "  本域 probes（4 条）在后拼接；不要用 extends 继承探针，因为 list 是整体替换。",
+    "查看合并结果：seedbrain config --profile profiles/example.json"
   ],
-  "extends": "base.json",
+  "extends": "builtin:base",
   "name": "example",
   "label": "示例方法库",
   "sources": [
@@ -39,6 +39,7 @@
     "state": "tests/fixtures/mini-domain/.seed-usage.json"
   },
   "verify": {
+    "probes_ref": "builtin:probes/core",
     "probes": [
       "降维压缩，矩阵分解选型",
       "最短路径与连通分量",

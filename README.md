@@ -294,6 +294,28 @@ seedbrain verify --profile my-domain.json
 合并规则只有两条：**dict 递归合并，list 与标量整体替换**。
 （list 不合并，是因为「想清空从 base 继承来的 probes」必须能表达。）
 
+**探针也能复用：`probes_ref`**
+
+`verify.probes` 是 list，按上表规则会被**整体替换** —— 所以它不能用 `extends` 继承。
+探针复用走独立字段：
+
+```jsonc
+{
+  "verify": {
+    "probes_ref": "builtin:probes/core",           // 引用公共池（池在前）
+    "probes": ["本域特有任务 1", "本域特有任务 2"]   // 追加（本域在后）
+  }
+}
+```
+
+`builtin:` 前缀解析到 SDK 包内 `seedbrain/data/`，所以领域仓库不用复制任何文件：
+
+```jsonc
+{ "extends": "builtin:base" }
+```
+
+这是跨仓库引用的正解 —— **零复制、零漂移、随 SDK 版本走**。
+
 看不明白某个值从哪来？
 
 ```bash

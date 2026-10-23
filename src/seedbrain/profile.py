@@ -15,6 +15,11 @@ from typing import Any
 
 SCHEMA_VERSION = 1
 
+#: 包内数据目录（builtin: 引用的落地位置）。
+#: 为什么放包里而不是仓库 profiles/：领域仓库要能 `extends: "builtin:base"`，
+#: 而包内资源随 SDK 版本走 —— 零复制、零漂移、可移植。
+DATA_DIR = Path(__file__).resolve().parent / "data"
+
 
 class ProfileError(ValueError):
     """profile 非法 —— 明确报错，绝不静默产出一个空索引。"""
@@ -93,6 +98,8 @@ class Profile:
     extends_chain: list[str] = field(default_factory=list)
     #: 合并后的原始 dict（`config --show` 直接输出它，避免再转一次）
     raw: dict = field(default_factory=dict)
+    #: 探针来源（`probes_ref` 展开后）：{"ref": ..., "pool": N, "local": M}
+    probes_source: dict = field(default_factory=dict)
 
     # ── 加载 ──────────────────────────────────────────────────────────
 
@@ -115,6 +122,7 @@ class Profile:
 
         # extends 在此处解析：递归合并 + 循环检测（见 _load_merged）。
         data, chain = _load_merged(p)
+        data = _apply_probes_ref(data, p.parent)
 
         if root:
             base = Path(root).expanduser().resolve()
@@ -127,6 +135,7 @@ class Profile:
         prof = cls._from_dict(data, base, p)
         prof.extends_chain = list(chain)
         prof.raw = data
+        prof.probes_source = dict((data.get("verify") or {}).get("_source") or {})
         prof.validate()
         return prof
 
@@ -294,6 +303,58 @@ def _compile(pattern: Any, field_name: str) -> re.Pattern | None:
 # ── extends 继承 ───────────────────────────────────────────────────────────
 
 
+def _resolve_ref(ref: str, base_dir: Path) -> Path:
+    """解析 ``extends`` / ``probes_ref`` 的引用。
+
+    两种形式：
+
+    * ``builtin:name`` → 包内 ``seedbrain/data/name``（随 SDK 版本走，零漂移）
+    * 其他 → 相对**引用者所在目录**（与 import 语义一致，不依赖 root）
+    """
+    s = str(ref)
+    if s.startswith("builtin:"):
+        name = s.split(":", 1)[1]
+        # 允许省略 .json 后缀（builtin:base 与 builtin:base.json 等价）
+        for cand in (DATA_DIR / name, DATA_DIR / f"{name}.json"):
+            if cand.is_file():
+                return cand.resolve()
+        raise ProfileError(
+            f"内置配置不存在：builtin:{name}（查找于 {DATA_DIR}，也试过 {name}.json）"
+        )
+    p = (base_dir / s).resolve()
+    if not p.is_file():
+        raise ProfileError(f"引用指向的文件不存在：{p}")
+    return p
+
+
+def _apply_probes_ref(data: dict, base_dir: Path) -> dict:
+    """把 ``verify.probes_ref`` 展开成 ``verify.probes``（池在前 + 本域在后）。
+
+    为什么单独成函数而不塞进 ``_from_dict``：这里的合并是**数组拼接**，
+    与 ``extends`` 的 dict 合并是两种规则。混在一起会让 ``_from_dict``
+    承担两套语义，而两套语义的例外情况迟早会打架。
+    """
+    verify = data.get("verify")
+    if not isinstance(verify, dict):
+        return data
+    ref = verify.pop("probes_ref", None)
+    if not ref:
+        return data
+
+    pool_path = _resolve_ref(str(ref), base_dir)
+    try:
+        pool = json.loads(pool_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ProfileError(f"探针池不是合法 JSON：{pool_path}（{exc}）") from exc
+    if not isinstance(pool, list) or not pool:
+        raise ProfileError(f"探针池必须是非空数组：{pool_path}")
+
+    local = [str(x) for x in (verify.get("probes") or [])]
+    verify["probes"] = [str(x) for x in pool] + local
+    verify["_source"] = {"ref": str(ref), "pool": len(pool), "local": len(local)}
+    return data
+
+
 def _deep_merge(base: dict, override: dict) -> dict:
     """dict 递归合并；list 与标量整体替换。
 
@@ -333,10 +394,6 @@ def _load_merged(path: Path, chain: tuple = ()) -> tuple:
     if not parent_rel:
         return data, []
 
-    base_path = (path.parent / str(parent_rel)).resolve()
-    if not base_path.is_file():
-        raise ProfileError(
-            f"extends 指向的文件不存在：{base_path}（来自 {path.name} 的 extends={parent_rel!r}）"
-        )
+    base_path = _resolve_ref(str(parent_rel), path.parent)
     base_data, base_chain = _load_merged(base_path, chain + (path,))
     return _deep_merge(base_data, data), base_chain + [str(parent_rel)]

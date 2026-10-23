@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-23
+
+### Added
+
+- **`probes_ref`：探针池可组合**。`verify.probes_ref` 引用公共池，`verify.probes`
+  作为本域追加（**池在前 + 本域在后**）。解决 v0.2 遗留问题：`extends` 对 list
+  是整体替换，导致探针无法「继承公共 + 追加特有」。
+- **`builtin:` 引用**：`extends` 与 `probes_ref` 都支持 `builtin:name` 前缀，
+  解析到包内 `seedbrain/data/`。领域仓库可直接写 `"extends": "builtin:base"`，
+  **零复制、零漂移、随 SDK 版本走** —— 跨仓库引用的正解。
+- **包内数据**：`src/seedbrain/data/base.json`（公共配置）+
+  `data/probes/core.json`（8 条跨领域任务形态探针），已写入 `package-data` 与
+  `MANIFEST.in`（漏了会在 pip 安装后失效）。
+- **`config --show` 报告探针来源**：`Profile.probes_source = {ref, pool, local}`。
+
+### Changed
+
+- `profiles/base.json` **移除**：改为包内 `data/base.json` 单一源，避免两份副本漂移。
+- `profiles/example.json`：改为 `extends: "builtin:base"` +
+  `probes_ref: "builtin:probes/core"`（探针 8 公共 + 4 本域 = 12 条）。
+- 测试 99 → **107**（8 个 probes_ref / builtin 用例：追加顺序 / 缺失 / 空池 /
+  坏 JSON / 回归 / builtin 解析 / builtin 缺失 / 来源记录）。
+
+### Fixed
+
+- **T5 状态轮转误判**：`check_rotation` 原先取 `probes[0]`，拼接探针池后第一条是
+  抽象形态探针，对具体领域零命中 → 必然 0 个不同。改为**选命中数最多的探针**；
+  若最佳探针只命中 < 2 粒，报 FAIL 并说明「探针太窄」——这是可诊断的失败，
+  不是算法失效。
+
 ## [0.2.0] - 2026-10-23
 
 ### Added

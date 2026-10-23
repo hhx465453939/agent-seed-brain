@@ -11,6 +11,7 @@ include CODE_OF_CONDUCT.md
 include pyproject.toml
 
 recursive-include src/seedbrain py.typed
+recursive-include src/seedbrain/data *.json
 recursive-include profiles *.json
 recursive-include docs *.md
 recursive-include examples *.py

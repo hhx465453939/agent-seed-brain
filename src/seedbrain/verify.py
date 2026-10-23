@@ -308,11 +308,28 @@ class CheckSuite:
             self._add(r, "T5", "状态轮转", "未配置 verify.probes", "跳过", True)
             return
         rounds = int(self.th.get("rotation_rounds", 6))
+
+        # 选**命中数最多**的探针，而不是第一条非空的：
+        # 只命中 1 粒的探针没有轮转空间（第 2 次仍是唯一候选，novelty 再低也只有它），
+        # 用它测出来必然是「1 个不同」——那是探针太窄，不是状态记忆失效。
+        chosen, best_n = None, 0
+        for p in probes:
+            n = len(self._rank_ids(p, 5))
+            if n > best_n:
+                chosen, best_n = p, n
+                if best_n >= 5:      # 候选已足够，不必再找
+                    break
+        if chosen is None or best_n < 2:
+            self._add(r, "T5", "状态轮转",
+                      f"最佳探针只命中 {best_n} 粒（需 >= 2 才可能轮转）—— 探针太窄",
+                      ">= 2 粒候选", False)
+            return
+
         state: dict = {"picks": {}}
         import time as _time
         tops: list[str] = []
         for _ in range(rounds):
-            ids = self._rank_ids(probes[0], 5, state=state)
+            ids = self._rank_ids(chosen, 5, state=state)
             if not ids:
                 break
             tops.append(ids[0])
