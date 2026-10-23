@@ -92,62 +92,14 @@ mkdir my-brain && cd my-brain
 mkdir notes
 ```
 
-**`notes/methods.md`** —— 源文件。格式由你定，profile 负责声明怎么解析。这里用
-紧凑的条目式：
+完整内容只在 README 维护一份，避免双语四份漂移：
 
-```markdown
-# Numerical Methods
+→ [README 的「快速开始（pip 路径）」一节](../../README.zh-CN.md)
 
-## Matrix & decomposition
+- `notes/methods.md` —— 12 条，分 3 组，紧凑条目式
+- `seedbrain.json` —— `extends: builtin:base` + 一个层
 
-- **Matrix decomposition** · svd —— 奇异值分解，把矩阵拆成低秩结构，降维与压缩的通用手段
-- **Low-rank approximation** · truncated-svd —— 截断奇异值，只保留最大的若干个，用于压缩与去噪
-- **QR iteration** · qr —— QR 迭代求特征值，适合中小规模稠密矩阵
-- **PCA projection** · pca —— 主成分投影，用方差最大的方向做线性降维
-- **Randomized sketch** · sketch —— 随机投影草图，用低维嵌入近似原矩阵，降维压缩的近似加速
-
-## Optimization
-
-- **Gradient descent** · gd —— 沿负梯度方向迭代，最基础的一阶优化
-- **Newton step** · newton —— 用二阶信息校正步长，收敛快但需要 Hessian
-- **Conjugate gradient** · cg —— 共轭方向法，解大型稀疏线性系统
-- **Backtracking line search** · backtracking —— 回溯线搜索，保证每步充分下降
-
-## Statistics
-
-- **Bootstrap CI** · resample —— 重采样估计置信区间，不依赖分布假设
-- **Jackknife** · leave-one-out —— 留一法估计偏差与方差
-- **Permutation test** · shuffle-test —— 置换检验，用打乱标签构造零分布
-```
-
-**`seedbrain.json`** —— profile。`builtin:base` 提供 norms / paths / 阈值，
-所以只写本域特有的部分：
-
-```json
-{
-  "extends": "builtin:base",
-  "name": "numerics",
-  "label": "数值方法",
-  "sources": [
-    {
-      "kind": "table",
-      "path": "notes/methods.md",
-      "layer": "method",
-      "group_re": "^##\\s+(?P<group>[^#].*)$",
-      "entry_re": "^-\\s*\\*\\*(?P<name>[^*]+?)\\*\\*\\s*·\\s*(?P<tag>[^—]+?)\\s*——\\s*(?P<desc>.+)$"
-    }
-  ],
-  "layers": {
-    "method": { "prefix": "m", "quota": 1.0, "label": "方法" }
-  },
-  "verify": {
-    "probes_ref": "builtin:probes/core",
-    "probes": ["降维压缩，矩阵分解选型"]
-  }
-}
-```
-
-构建并查询：
+两个文件就位后：
 
 ```bash
 seedbrain build  --profile seedbrain.json

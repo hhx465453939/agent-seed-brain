@@ -23,8 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **README 瘦身为「概览 + 可立即执行的命令」**，四个机制的推导、边界与排障细节
   下放到 `docs/`，README 只做引用。
-- `docs/METHODOLOGY.md` 改为跳转页，保留旧链接可用，内容迁入
-  `docs/en/methodology.md` 与 `docs/zh-CN/methodology.md`。
+- **删除 `docs/METHODOLOGY.md`**：内容已双语化迁入
+  `docs/{en,zh-CN}/methodology.md`，跳转页无独家内容，留着只是第二个入口。
+  同步修正 `CONTRIBUTING.md`、`SECURITY.md`、`src/seedbrain/__init__.py` 的引用。
+- **消除文档重复**：完整最小示例（源文件 + profile 全文）此前在 README 与
+  `docs/*/getting-started.md` 各存一份（双语共四份），现在只在 README 维护，
+  getting-started 改为引用并保留验收输出。
 - `MANIFEST.in` 纳入 `README.zh-CN.md`；sdist 同时携带两套 README。
 
 ### Fixed

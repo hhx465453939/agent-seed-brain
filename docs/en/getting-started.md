@@ -97,62 +97,15 @@ mkdir my-brain && cd my-brain
 mkdir notes
 ```
 
-**`notes/methods.md`** — the source. The format is your choice; the profile
-declares how to parse it. This example uses the compact table style:
+Both files are maintained in exactly one place — the README — so there is no
+second copy to drift:
 
-```markdown
-# Numerical Methods
+→ [README › Quick start (the pip path)](../../README.md#quick-start-the-pip-path)
 
-## Matrix & decomposition
+- `notes/methods.md` — 12 entries across 3 groups, compact table style
+- `seedbrain.json` — `extends: builtin:base` plus a single layer
 
-- **Matrix decomposition** · svd —— 奇异值分解，把矩阵拆成低秩结构，降维与压缩的通用手段
-- **Low-rank approximation** · truncated-svd —— 截断奇异值，只保留最大的若干个，用于压缩与去噪
-- **QR iteration** · qr —— QR 迭代求特征值，适合中小规模稠密矩阵
-- **PCA projection** · pca —— 主成分投影，用方差最大的方向做线性降维
-- **Randomized sketch** · sketch —— 随机投影草图，用低维嵌入近似原矩阵，降维压缩的近似加速
-
-## Optimization
-
-- **Gradient descent** · gd —— 沿负梯度方向迭代，最基础的一阶优化
-- **Newton step** · newton —— 用二阶信息校正步长，收敛快但需要 Hessian
-- **Conjugate gradient** · cg —— 共轭方向法，解大型稀疏线性系统
-- **Backtracking line search** · backtracking —— 回溯线搜索，保证每步充分下降
-
-## Statistics
-
-- **Bootstrap CI** · resample —— 重采样估计置信区间，不依赖分布假设
-- **Jackknife** · leave-one-out —— 留一法估计偏差与方差
-- **Permutation test** · shuffle-test —— 置换检验，用打乱标签构造零分布
-```
-
-**`seedbrain.json`** — the profile. `builtin:base` supplies norms, paths and
-thresholds, so you only write what is domain-specific:
-
-```json
-{
-  "extends": "builtin:base",
-  "name": "numerics",
-  "label": "Numerical Methods",
-  "sources": [
-    {
-      "kind": "table",
-      "path": "notes/methods.md",
-      "layer": "method",
-      "group_re": "^##\\s+(?P<group>[^#].*)$",
-      "entry_re": "^-\\s*\\*\\*(?P<name>[^*]+?)\\*\\*\\s*·\\s*(?P<tag>[^—]+?)\\s*——\\s*(?P<desc>.+)$"
-    }
-  ],
-  "layers": {
-    "method": { "prefix": "m", "quota": 1.0, "label": "Methods" }
-  },
-  "verify": {
-    "probes_ref": "builtin:probes/core",
-    "probes": ["降维压缩，矩阵分解选型"]
-  }
-}
-```
-
-Now build and query:
+With both files in place:
 
 ```bash
 seedbrain build  --profile seedbrain.json
