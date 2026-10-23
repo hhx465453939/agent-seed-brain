@@ -1,29 +1,86 @@
 name: Release
 
-# 触发：推送 v* 标签（如 v0.1.0）
+# 触发：
+#   1. 推送 v* tag —— 验证 → 构建 → 发 PyPI → 建 GitHub Release（全自动，幂等）
+#   2. 手动 workflow_dispatch —— 补发历史版本时指定 tag，或只验证/只构建
+#
+# 幂等是硬要求：同一个版本重复触发必须成功（跳过已存在的文件），
+# 而不是让 PyPI 的 `400 File already exists` 留下一片红叉 —— 红叉会掩盖真正的失败。
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "要发布的 tag（如 v0.1.1）。留空 = 触发 ref 的 HEAD"
+        required: false
+        default: ""
+        type: string
+      publish:
+        description: "发布到 PyPI（已存在的文件自动跳过）"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
 
+# 同一版本不允许两个发布同时跑，否则 PyPI 侧会出现竞态。
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
-  # ── 闸门：发布前必须先在 tag 上跑一遍完整验证 ──────────────────────
+  # ── 闸门：发布前必须先在目标 ref 上跑一遍完整验证 ──────────────────
   verify:
     name: 发布前验证
     runs-on: ubuntu-latest
+    env:
+      REF_NAME: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      # 补发历史版本最容易翻的车：checkout 错 ref，把 main 上的新代码
+      # 以旧版本号推上 PyPI。PyPI 不允许覆盖同名文件，发错了只能 yank + 升版本，
+      # 所以这条断言必须挡在最前面。
+      - name: 断言 tag 与包版本一致
+        run: |
+          python - <<'PY'
+          import os, pathlib, re, sys
+
+          ref = os.environ["REF_NAME"].strip()
+          text = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+          m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.M)
+          if not m:
+              sys.exit("::error::pyproject.toml 缺失 [project].version")
+
+          ver = m.group(1)
+          print(f"ref={ref!r}  version={ver!r}")
+
+          if not ref.startswith("v"):
+              print("::notice::ref 不是 v* tag，跳过 tag↔版本一致性校验")
+              sys.exit(0)
+
+          if ref != "v" + ver:
+              sys.exit(
+                  f"::error::tag {ref} 与 pyproject version {ver} 不一致（应为 v{ver}）"
+                  " —— 拒绝发布：否则会把错版本的产物推到 PyPI，且不可撤回"
+              )
+          print("✓ tag 与包版本一致")
+          PY
+
       - name: 安装并断言零运行时依赖
         run: |
           python -m pip install --upgrade pip setuptools
           python -m pip install -e .
           python -c "import importlib.metadata as m,sys; r=[x for x in (m.requires('agent-seed-brain') or []) if 'extra ==' not in x]; print('runtime deps =', r or '[]'); sys.exit(1 if r else 0)"
+
       - name: 测试与断言
         run: |
           python -m unittest discover -s tests
@@ -37,14 +94,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: 构建
         run: |
           python -m pip install --upgrade pip build twine
           python -m build
           python -m twine check dist/*
+
       - name: 校验产物里带上了许可与声明
         run: |
           python - <<'PY'
@@ -57,18 +119,20 @@ jobs:
           print("缺失:", missing or "无")
           sys.exit(1 if missing else 0)
           PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
 
   # ── 发布：PyPI Trusted Publishing（OIDC，不需要 API token）──────────
-  # 只在手动触发时发布。推 tag 只做 verify + build，不碰 PyPI ——
-  # 否则 PyPI 尚未配置 trusted publisher 时会白白产生一条失败记录。
+  # skip-existing 让「重跑同一次发布」变成成功而非 400 失败。
   publish:
     name: 发布到 PyPI
-    if: github.event_name == 'workflow_dispatch'
     needs: build
+    if: >-
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+      || (github.event_name == 'workflow_dispatch' && inputs.publish)
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -80,5 +144,82 @@ jobs:
         with:
           name: dist
           path: dist/
+
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # PyPI 不允许同名文件覆盖。补发/重跑时已存在的文件应跳过，
+          # 而不是让整个 run 变红 —— 红色只应代表"真的出问题了"。
+          skip-existing: true
+
+  # ── GitHub Release：此前完全缺失的一环 ─────────────────────────────
+  # 没有这一步，tag 只是 git 对象，GitHub 上没有可读的 release 页面，
+  # 用户也无从下载产物。
+  github-release:
+    name: 创建 GitHub Release
+    needs: build
+    if: >-
+      startsWith(github.ref, 'refs/tags/v')
+      || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 建 release 需要写权限
+    env:
+      REF_NAME: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0   # 拿全量 tag，供 gh release --verify-tag 校验
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: 从 CHANGELOG 提取本版本小节
+        run: |
+          python - <<'PY'
+          import os, pathlib, re
+
+          ref = os.environ["REF_NAME"].strip()
+          ver = ref[1:] if ref.startswith("v") else ref
+          text = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+
+          pat = re.compile(
+              r"^## \[" + re.escape(ver) + r"\][^\n]*\n(.*?)(?=^## \[|\Z)",
+              re.M | re.S,
+          )
+          m = pat.search(text)
+          body = m.group(1).strip() if m else ""
+          if not body:
+              body = (
+                  f"本版本未在 CHANGELOG.md 登记小节，见 "
+                  f"https://github.com/{os.environ['GITHUB_REPOSITORY']}"
+                  f"/blob/{ref}/CHANGELOG.md"
+              )
+
+          notes = (
+              f"**PyPI**: https://pypi.org/project/agent-seed-brain/{ver}/\n\n"
+              f"---\n\n{body}\n"
+          )
+          out = pathlib.Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "RELEASE_NOTES.md"
+          out.write_text(notes, encoding="utf-8")
+          print(f"notes: {len(notes)} chars | changelog section found: {bool(m)} | {out}")
+          PY
+
+      # 幂等：已存在则同步说明与产物，不存在才创建。补发历史版本会重跑整个链路，
+      # 不能因为 release 已存在而失败。
+      - name: 创建或更新 Release
+        run: |
+          if gh release view "$REF_NAME" >/dev/null 2>&1; then
+            echo "::notice::Release $REF_NAME 已存在 —— 同步说明与产物"
+            gh release upload "$REF_NAME" dist/* --clobber
+            gh release edit "$REF_NAME" --notes-file "$RUNNER_TEMP/RELEASE_NOTES.md"
+          else
+            gh release create "$REF_NAME" dist/* \
+              --title "$REF_NAME" \
+              --notes-file "$RUNNER_TEMP/RELEASE_NOTES.md" \
+              --verify-tag
+          fi

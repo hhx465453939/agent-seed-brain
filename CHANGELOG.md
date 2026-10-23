@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **发布流水线幂等化**：`pypa/gh-action-pypi-publish` 启用 `skip-existing`。
+  此前重复触发同一版本的发布，PyPI 会返回 `400 File already exists`，把一条
+  「其实早就发布成功」的 run 变成红叉 —— 红色只应代表真的出问题。
+- **补上 GitHub Release 步骤**：`release.yml` 原先只发 PyPI，不创建 GitHub
+  Release，导致 v0.1.0–v0.3.0 四个 tag 在 GitHub 上均无 release 页面、无产物下载。
+  新增 `github-release` job：从 `CHANGELOG.md` 提取本版本小节作为 release 说明，
+  附上 sdist + wheel，已存在则同步而非报错。
+- **tag ↔ 包版本一致性闸门**：`verify` 在安装前断言 `ref` 与
+  `pyproject.toml` 的 `version` 一致。补发历史版本时最容易 checkout 错 ref，
+  把新代码以旧版本号推上 PyPI —— 而 PyPI 不允许覆盖同名文件，只能 yank + 升版本。
+- **`workflow_dispatch` 支持指定 `tag` 与 `publish`**：补发历史版本时 checkout
+  指定 tag，不再依赖「切到某分支再手动跑」这种容易搞错的姿势；也可只验证/构建而不发布。
+- **tag 推送直接发布**：原先推 `v*` tag 只做验证与构建，必须再手动跑一次才发 PyPI，
+  这个人工环节正是「漏发 / 重复补发」的温床。现在 tag 推送即完成全链路，
+  手动触发保留为补发通道。
+
 ## [0.3.0] - 2026-10-23
 
 ### Added

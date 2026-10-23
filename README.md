@@ -1,10 +1,10 @@
 <img src="assets/banner.svg" alt="seed brain" width="100%">
 
 <p align="center">
-  <a href="https://pypi.org/project/agent-seed-brain/"><img alt="PyPI" src="https://img.shields.io/badge/pypi-v0.1.0-FFD400?style=flat-square&labelColor=0A0A0A"></a>
+  <a href="https://pypi.org/project/agent-seed-brain/"><img alt="PyPI" src="https://img.shields.io/pypi/v/agent-seed-brain?color=FFD400&labelColor=0A0A0A&style=flat-square"></a>
   <img alt="Python" src="https://img.shields.io/badge/python-3.9%20~%203.13-00E5C0?style=flat-square&labelColor=0A0A0A">
   <img alt="Dependencies" src="https://img.shields.io/badge/runtime%20deps-0-7B5CFF?style=flat-square&labelColor=0A0A0A">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-91%20passing-FF2D78?style=flat-square&labelColor=0A0A0A">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-107%20passing-FF2D78?style=flat-square&labelColor=0A0A0A">
   <img alt="License" src="https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-0A0A0A?style=flat-square&labelColor=FFFFFF">
   <img alt="Status" src="https://img.shields.io/badge/status-source--available-FF2D78?style=flat-square&labelColor=0A0A0A">
 </p>
@@ -59,15 +59,19 @@ pip install -e .
 seedbrain --version
 ```
 
-**② 从 PyPI（v0.1.0 发布后）**
+**② 从 PyPI**
 
 ```bash
 pip install agent-seed-brain
 ```
 
-> 发布由 `.github/workflows/release.yml` 完成（Trusted Publishing / OIDC，不需要 API token）。
-> 维护者先在 PyPI 配好 trusted publisher，再手动跑一次该 workflow；推 `v*` tag 只做验证与构建，
-> 不会自动发布。
+> 发布由 `.github/workflows/release.yml` 完成（Trusted Publishing / OIDC，不需要 API token），
+> 全链路幂等：验证 → 构建 → 发 PyPI（已存在的文件自动跳过）→ 建 GitHub Release（已存在则同步）。
+>
+> - **正常发版**：把 `pyproject.toml` 的 `version` 改好，打 tag（`v0.4.0`）并推送即可。
+>   流水线会先断言 tag 与包版本一致，不一致直接拒绝发布。
+> - **补发历史版本**：手动触发该 workflow，`tag` 填要补的版本（如 `v0.1.1`），
+>   `publish` 决定是否同时发 PyPI。已存在的文件与 release 都会被跳过/更新，不会报错。
 
 **③ 零安装试用**
 
