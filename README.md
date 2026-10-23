@@ -277,6 +277,30 @@ seedbrain match  "你的任务描述" --profile my-domain.json
 seedbrain verify --profile my-domain.json
 ```
 
+**只写差异：`extends` 继承**
+
+公共参数（`norms` / `paths` / 阈值）放进 `profiles/base.json`，领域 profile 只写差异：
+
+```jsonc
+{
+  "extends": "base.json",
+  "name": "my-domain",
+  "sources": [ /* 本域特有 */ ],
+  "layers":  { /* 本域特有 */ },
+  "verify":  { "probes": [ /* list 整体替换 */ ] }
+}
+```
+
+合并规则只有两条：**dict 递归合并，list 与标量整体替换**。
+（list 不合并，是因为「想清空从 base 继承来的 probes」必须能表达。）
+
+看不明白某个值从哪来？
+
+```bash
+seedbrain config --profile my-domain.json --chain   # 继承链：谁是父
+seedbrain config --profile my-domain.json           # 合并后的最终配置
+```
+
 细节见 [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md)。
 
 ---

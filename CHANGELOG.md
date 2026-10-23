@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-23
+
+### Added
+
+- **profile 继承（`extends`）**：领域配置只写差异，公共的 `norms` / `paths` /
+  `verify.thresholds` 从 `profiles/base.json` 继承。合并规则固定：
+  **dict 递归合并，list 与标量整体替换**（list 不合并，是因为「想清空从 base
+  继承来的 probes」必须能表达）。
+- **`seedbrain config`**：打印合并后的最终配置；`--chain` 只打印继承链。
+  继承最大的风险不是写错，而是**排不出来** —— 没有这条命令，出问题只能靠猜
+  「这个阈值到底来自 base 还是自己写的」。
+- **循环继承检测**：A→B→A 直接报错（带完整链路），不会递归到栈溢出。
+
+### Changed
+
+- `profiles/example.json` 改为继承 `profiles/base.json`，只保留本域差异。
+- 测试 91 → **99**（新增 8 个继承用例：递归合并 / list 替换 / 不改 base /
+  循环 / 缺失 base / 继承链记录 / base 正则报错 / 端到端等价）。
+
 ## [0.1.1] - 2026-10-22
 
 ### Fixed

@@ -40,7 +40,15 @@ def isolation_ok() -> bool:
 
 
 def read_example_profile() -> dict[str, Any]:
-    return json.loads(EXAMPLE_PROFILE.read_text(encoding="utf-8"))
+    """读 example profile 的**合并后**配置（``extends`` 已展开）。
+
+    为什么不在临时仓库里保留 ``extends``：临时仓库必须自包含 —— 若保留，
+    每个测试都要额外复制 ``base.json``，且报错会混入「base 找不到」这种与
+    被测行为无关的噪音。继承机制本身由 ``test_profile.InheritanceTest`` 覆盖。
+    """
+    from seedbrain.profile import Profile
+
+    return Profile.load(EXAMPLE_PROFILE, root=ROOT).raw
 
 
 def make_tmp_repo(out_dir: Path) -> Path:

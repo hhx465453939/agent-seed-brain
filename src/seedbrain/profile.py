@@ -89,6 +89,10 @@ class Profile:
     schema_version: int = SCHEMA_VERSION
     root: Path = field(default_factory=lambda: Path.cwd())
     src_path: Path | None = None
+    #: `extends` 继承链（不含自身），供 `config --show` 与断言使用
+    extends_chain: list[str] = field(default_factory=list)
+    #: 合并后的原始 dict（`config --show` 直接输出它，避免再转一次）
+    raw: dict = field(default_factory=dict)
 
     # ── 加载 ──────────────────────────────────────────────────────────
 
@@ -108,12 +112,9 @@ class Profile:
         p = Path(path).expanduser().resolve()
         if not p.is_file():
             raise ProfileError(f"profile 不存在：{p}")
-        try:
-            data = json.loads(p.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            raise ProfileError(f"profile 不是合法 JSON：{p}（{exc}）") from exc
-        if not isinstance(data, dict):
-            raise ProfileError(f"profile 顶层必须是对象：{p}")
+
+        # extends 在此处解析：递归合并 + 循环检测（见 _load_merged）。
+        data, chain = _load_merged(p)
 
         if root:
             base = Path(root).expanduser().resolve()
@@ -124,6 +125,8 @@ class Profile:
         else:
             base = p.parent
         prof = cls._from_dict(data, base, p)
+        prof.extends_chain = list(chain)
+        prof.raw = data
         prof.validate()
         return prof
 
@@ -286,3 +289,54 @@ def _compile(pattern: Any, field_name: str) -> re.Pattern | None:
         return re.compile(str(pattern), re.MULTILINE)
     except re.error as exc:
         raise ProfileError(f"{field_name} 不是合法正则：{exc}") from exc
+
+
+# ── extends 继承 ───────────────────────────────────────────────────────────
+
+
+def _deep_merge(base: dict, override: dict) -> dict:
+    """dict 递归合并；list 与标量整体替换。
+
+    为什么 list 整体替换而不合并：合并会让「想清空从 base 继承来的 probes」
+    变得不可能，而配置里 list 的语义通常是「这是我的完整清单」。
+    """
+    out = dict(base)
+    for k, v in override.items():
+        if k in out and isinstance(out[k], dict) and isinstance(v, dict):
+            out[k] = _deep_merge(out[k], v)
+        else:
+            out[k] = v
+    return out
+
+
+def _load_merged(path: Path, chain: tuple = ()) -> tuple:
+    """读 JSON 并递归应用 ``extends``，返回 ``(合并后的 dict, 继承链)``。
+
+    三条硬约束：
+
+    * ``extends`` 相对**当前 profile 所在目录**解析（与 import 语义一致，不依赖 root）；
+    * 循环继承直接报错，不递归到栈溢出；
+    * merge 规则固定：dict 递归、list / 标量替换。
+    """
+    if path in chain:
+        names = " → ".join(p.name for p in chain + (path,))
+        raise ProfileError(f"profile 继承出现循环：{names}")
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ProfileError(f"profile 不是合法 JSON：{path}（{exc}）") from exc
+    if not isinstance(raw, dict):
+        raise ProfileError(f"profile 顶层必须是对象：{path}")
+
+    parent_rel = raw.get("extends")
+    data = {k: v for k, v in raw.items() if k != "extends"}
+    if not parent_rel:
+        return data, []
+
+    base_path = (path.parent / str(parent_rel)).resolve()
+    if not base_path.is_file():
+        raise ProfileError(
+            f"extends 指向的文件不存在：{base_path}（来自 {path.name} 的 extends={parent_rel!r}）"
+        )
+    base_data, base_chain = _load_merged(base_path, chain + (path,))
+    return _deep_merge(base_data, data), base_chain + [str(parent_rel)]

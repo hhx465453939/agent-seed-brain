@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 import helpers
-from seedbrain.profile import Profile, ProfileError
+from seedbrain.profile import Profile, ProfileError, _deep_merge, _load_merged
 
 
 class _Base(unittest.TestCase):
@@ -103,6 +103,114 @@ class PathSafetyTest(_Base):
     def test_resolve_allows_inside(self):
         prof = self._load()
         self.assertTrue(str(prof.resolve("tests/fixtures/mini-domain/tools.md")).endswith("tools.md"))
+
+
+class InheritanceTest(unittest.TestCase):
+    """`extends` 的语义必须有测试兜住 —— 合并规则写错会静默影响所有领域。
+
+    两组：纯函数（_deep_merge / _load_merged，精确）与端到端（Profile.load，真实）。
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _write(self, name, data):
+        p = self.tmp / name
+        p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        return p
+
+    # ── 纯函数 ──────────────────────────────────────────────────
+
+    def test_deep_merge_recurses_dicts(self):
+        base = {"norms": {"decay_tau_days": 14.0, "max_hits": 5}, "name": "b"}
+        over = {"norms": {"decay_tau_days": 7.0}}
+        merged = _deep_merge(base, over)
+        self.assertEqual(merged["norms"]["decay_tau_days"], 7.0)   # 子覆盖
+        self.assertEqual(merged["norms"]["max_hits"], 5)          # 父保留
+        self.assertEqual(merged["name"], "b")
+
+    def test_deep_merge_replaces_lists(self):
+        """list 整体替换 —— 否则「清空继承来的 probes」无法表达。"""
+        merged = _deep_merge({"probes": ["a", "b", "c"]}, {"probes": ["z"]})
+        self.assertEqual(merged["probes"], ["z"])
+
+    def test_deep_merge_does_not_mutate_base(self):
+        base = {"norms": {"max_hits": 5}}
+        _deep_merge(base, {"norms": {"max_hits": 9}})
+        self.assertEqual(base["norms"]["max_hits"], 5)
+
+    def test_load_merged_chain(self):
+        self._write("base.json", {"schema_version": 1, "name": "base"})
+        child = self._write("child.json", {"extends": "base.json", "name": "child"})
+        data, chain = _load_merged(child)
+        self.assertEqual(chain, ["base.json"])
+        self.assertEqual(data["name"], "child")
+        self.assertNotIn("extends", data)
+
+    def test_load_merged_cycle_detected(self):
+        self._write("a.json", {"extends": "b.json", "name": "a"})
+        self._write("b.json", {"extends": "a.json", "name": "b"})
+        with self.assertRaises(ProfileError) as ctx:
+            _load_merged(self.tmp / "a.json")
+        self.assertIn("循环", str(ctx.exception))
+
+    def test_load_merged_missing_base(self):
+        child = self._write("child.json", {"extends": "nope.json", "name": "c"})
+        with self.assertRaises(ProfileError) as ctx:
+            _load_merged(child)
+        self.assertIn("不存在", str(ctx.exception))
+
+    def test_load_merged_bad_regex_in_base(self):
+        """base 里的正则写错时，报错必须指向具体字段。"""
+        self._write("base.json", {
+            "schema_version": 1, "name": "base",
+            "sources": [{"kind": "table", "path": "x.md", "layer": "t",
+                         "entry_re": "(unclosed"}],
+            "layers": {"t": {"prefix": "t", "quota": 1.0}},
+        })
+        child = self._write("child.json", {"extends": "base.json", "name": "c"})
+        with self.assertRaises(ProfileError) as ctx:
+            Profile.load(child, root=self.tmp)
+        self.assertIn("正则", str(ctx.exception))
+
+    # ── 端到端 ──────────────────────────────────────────────────
+
+    def _valid_min_profile(self, name, extra=None):
+        """构造最小合法 profile（对 fixture 源的引用改成临时目录里的文件）。"""
+        (self.tmp / "src.md").write_text(
+            "## g\n\n- **甲** · 类 —— 描述甲 ｜ 信号：甲\n", encoding="utf-8")
+        data = {
+            "schema_version": 1, "name": name,
+            "sources": [{"kind": "table", "path": "src.md", "layer": "t",
+                         "group_re": r"^##\s+(?P<group>.+)$",
+                         "entry_re": r"^-\s*\*\*(?P<name>[^*]+?)\*\*\s*·\s*(?P<tag>[^—]+?)\s*——\s*(?P<desc>.+)$"}],
+            "layers": {"t": {"prefix": "t", "quota": 1.0}},
+        }
+        if extra:
+            data.update(extra)
+        return data
+
+    def test_profile_extends_end_to_end(self):
+        self._write("base.json", {
+            "schema_version": 1, "norms": {"decay_tau_days": 14.0, "max_hits": 5},
+            "verify": {"thresholds": {"recall_name": 0.98, "gini_max": 0.8}},
+        })
+        child = self._write("child.json", self._valid_min_profile("child", {
+            "extends": "base.json",
+            "norms": {"decay_tau_days": 7.0},
+            "verify": {"probes": ["甲"], "thresholds": {"recall_name": 0.9}},
+        }))
+        p = Profile.load(child, root=self.tmp)
+        self.assertEqual(p.extends_chain, ["base.json"])
+        self.assertEqual(p.norms.decay_tau_days, 7.0)   # 覆盖
+        self.assertEqual(p.norms.max_hits, 5)           # 继承
+        self.assertEqual(p.verify.thresholds["recall_name"], 0.9)   # 覆盖
+        self.assertEqual(p.verify.thresholds["gini_max"], 0.8)      # 继承
+        self.assertEqual(p.verify.probes, ["甲"])                   # 替换
 
 
 if __name__ == "__main__":

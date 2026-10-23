@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "公共配置：所有领域 profile 的基础 defaults。",
+    "各领域用 \"extends\": \"base.json\" 继承，只写差异部分。",
+    "合并规则（固定，不可配置）：dict 递归合并；list 与标量整体替换。",
+    "为什么 list 替换而不合并：合并会让「想清空从 base 继承来的 probes/legacy_shelf」变成不可能。",
+    "查看合并结果：seedbrain config --show --profile <你的 profile>"
+  ],
+  "schema_version": 1,
+  "norms": {
+    "decay_tau_days": 14.0,
+    "count_penalty": 0.5,
+    "max_hits": 5,
+    "gram_w2": 1.0,
+    "gram_w3": 0.35,
+    "dup_threshold": 0.75
+  },
+  "paths": {
+    "index_jsonl": "references/seed-index.jsonl",
+    "index_md": "references/SEED-INDEX.md",
+    "additions": "references/seed-additions.jsonl",
+    "state": "references/.seed-usage.json"
+  },
+  "verify": {
+    "thresholds": {
+      "recall_name": 0.98,
+      "recall_feature": 0.6,
+      "gini_max": 0.8,
+      "idf_top1_gain": 0.15,
+      "layer_dominance_max": 0.7,
+      "rotation_min": 4,
+      "decenter_min": 0.5
+    }
+  }
+}

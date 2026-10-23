@@ -1,5 +1,13 @@
 {
-  "schema_version": 1,
+  "_comment": [
+    "最小可用示例域。用 extends 继承 base.json 的公共配置，只写差异：",
+    "  · sources / layers —— 本域特有",
+    "  · paths —— 输出到 tests/fixtures/（示例域不污染 references/）",
+    "  · verify.probes / generic_fill / legacy_shelf —— list 整体替换",
+    "  · verify.thresholds —— dict 递归合并（只覆盖 recall_name 一项）",
+    "查看合并结果：seedbrain config --show --profile profiles/example.json"
+  ],
+  "extends": "base.json",
   "name": "example",
   "label": "示例方法库",
   "sources": [
@@ -30,14 +38,6 @@
     "additions": "tests/fixtures/mini-domain/seed-additions.jsonl",
     "state": "tests/fixtures/mini-domain/.seed-usage.json"
   },
-  "norms": {
-    "decay_tau_days": 14.0,
-    "count_penalty": 0.5,
-    "max_hits": 5,
-    "gram_w2": 1.0,
-    "gram_w3": 0.35,
-    "dup_threshold": 0.75
-  },
   "verify": {
     "probes": [
       "降维压缩，矩阵分解选型",
@@ -48,13 +48,7 @@
     "generic_fill": ["方法", "计算", "结果", "分析"],
     "legacy_shelf": ["tl-矩阵分解", "tl-图遍历"],
     "thresholds": {
-      "recall_name": 0.9,
-      "recall_feature": 0.6,
-      "gini_max": 0.8,
-      "idf_top1_gain": 0.1,
-      "layer_dominance_max": 0.7,
-      "rotation_min": 3,
-      "decenter_min": 0.3
+      "recall_name": 0.9
     }
   }
 }

@@ -182,6 +182,26 @@ def cmd_stats(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_config(args: argparse.Namespace) -> int:
+    """打印合并后的最终配置 —— 继承的调试入口。
+
+    没有它，出问题时只能靠猜「这个阈值到底来自 base 还是自己写的」。
+    继承链只允许单层是有意的：链越长，「这值从哪来」越难回答。
+    """
+    from . import SeedBrain
+
+    prof = SeedBrain.load(args.profile, args.root).profile
+    if args.chain:
+        _out(str(prof.src_path))
+        for rel in prof.extends_chain:
+            _out(f"  ← {rel}")
+        if not prof.extends_chain:
+            _out("  （无 extends）")
+        return 0
+    _out(json.dumps(prof.raw, ensure_ascii=False, indent=2))
+    return 0
+
+
 # ── evidence 渲染 ─────────────────────────────────────────────────────────
 
 
@@ -264,6 +284,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("stats", help="覆盖率审计")
     common(p)
     p.set_defaults(func=cmd_stats)
+
+    p = sub.add_parser("config", help="打印合并后的最终配置（继承调试）")
+    common(p)
+    p.add_argument("--chain", action="store_true", help="只打印继承链")
+    p.set_defaults(func=cmd_config)
 
     return ap
 
