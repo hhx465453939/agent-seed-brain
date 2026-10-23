@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`AGENTS.md` + `CLAUDE.md` 项目治理文档**：`AGENTS.md` 是唯一权威，包含五条硬
+  约束（零依赖 / 确定性 / 3.9 地板 / 可失败断言 / 只放规则）、代码地图、双语文档治理
+  规则、变更与发布流程、禁区清单、真实踩坑记录。`CLAUDE.md` 通过 `@AGENTS.md` 导入
+  并补充 Claude 侧工作流（图谱优先、改动循环、文档同步、判断边界）。
 - **双语文档体系**：`README.md` 改为英文（GitHub / PyPI 默认），新增
   `README.zh-CN.md` 中文版，两份顶部互相链接。
 - **`docs/en/` 与 `docs/zh-CN/` 各五篇**：`getting-started`（安装与首次建索引）、
