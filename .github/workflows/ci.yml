@@ -71,7 +71,7 @@ jobs:
   # 引擎与语料同为 CC BY-NC-SA 4.0，但属两份独立版权客体。
   # 混入一条批量条目会让再许可与商业授权的边界变得不可追溯，所以留最后一道防线。
   # 白名单里的文件可以提到这些词：
-  #   README / CHANGELOG / NOTICE / CONTRIBUTING / docs —— 用于说明来源与边界
+  #   README.md / README.zh-CN.md / CHANGELOG / NOTICE / CONTRIBUTING / docs —— 用于说明来源与边界
   #   tasks/ —— 工程契约，记录决策与风险
   #   profiles/ —— 只含【指向上游文件的路径】，是解析规则而非内容
   license-guard:
@@ -84,7 +84,7 @@ jobs:
           set +e
           hits=$(grep -rIl -E "赛博霓虹|吉卜力|art-seeds|卡拉瓦乔" \
                  --include="*.py" --include="*.json" --include="*.md" . \
-                 | grep -vE "^(\./)?(README\.md|CHANGELOG\.md|NOTICE|CONTRIBUTING\.md|docs/METHODOLOGY\.md|tasks/|profiles/)" )
+                 | grep -vE "^(\./)?(README\.md|README\.zh-CN\.md|CHANGELOG\.md|NOTICE|CONTRIBUTING\.md|docs/|tasks/|profiles/)" )
           set -e
           if [ -n "$hits" ]; then
             echo "::error::检测到疑似上游策展内容，请确认许可后移除："

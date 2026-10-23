@@ -7,8 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **双语文档体系**：`README.md` 改为英文（GitHub / PyPI 默认），新增
+  `README.zh-CN.md` 中文版，两份顶部互相链接。
+- **`docs/en/` 与 `docs/zh-CN/` 各五篇**：`getting-started`（安装与首次建索引）、
+  `usage`（CLI + 库 API 全量参考）、`profiles`（schema / `extends` / `probes_ref` /
+  `builtin:`）、`methodology`（原理与已知边界）、`faq`（排障）。各语言版本的 README
+  只链接同语言的 docs。
+- **README 补齐 pip 安装后的真实路径**：明确 wheel 里只有引擎与
+  `data/`，不含 `profiles/example.json` 与测试夹具，并给出一条实测可跑通的
+  最小示例（12 粒 → `build` / `match` / `verify` 27/27）。
+
+### Changed
+
+- **README 瘦身为「概览 + 可立即执行的命令」**，四个机制的推导、边界与排障细节
+  下放到 `docs/`，README 只做引用。
+- `docs/METHODOLOGY.md` 改为跳转页，保留旧链接可用，内容迁入
+  `docs/en/methodology.md` 与 `docs/zh-CN/methodology.md`。
+- `MANIFEST.in` 纳入 `README.zh-CN.md`；sdist 同时携带两套 README。
+
 ### Fixed
 
+- **`--root` 帮助文案与实现不一致**：实际规则是「显式参数 → profile 的 `root` 字段
+  → 父目录名为 `profiles/` 时取上一级 → 否则取 profile 所在目录」，原文案只写了
+  最后两条的特例。现已在 `--help` 与 `docs/*/usage.md` 中对齐。
 - **发布流水线幂等化**：`pypa/gh-action-pypi-publish` 启用 `skip-existing`。
   此前重复触发同一版本的发布，PyPI 会返回 `400 File already exists`，把一条
   「其实早就发布成功」的 run 变成红叉 —— 红色只应代表真的出问题。

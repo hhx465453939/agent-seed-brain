@@ -32,7 +32,7 @@ This is a local library with no network access and no server. The realistic atta
 ## Out of scope
 
 - Prompt-injection content inside *your own* seed libraries (that is data, not code)
-- Denial of service via an intentionally enormous corpus (documented scaling limits: `docs/METHODOLOGY.md` §7)
+- Denial of service via an intentionally enormous corpus (documented scaling limits: `docs/en/methodology.md` §7)
 - Issues that require an attacker to already control your filesystem or Python environment
 
 ## Hardening notes for users

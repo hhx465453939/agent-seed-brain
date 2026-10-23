@@ -43,7 +43,7 @@ PYTHONPATH=src python -m unittest discover -s tests
 python -m seedbrain.cli verify --profile profiles/example.json
 ```
 
-All three must pass. If `verify` fails, **do not lower the threshold** — find out whether it is the implementation or the assertion that is wrong. Both have happened before (see `docs/METHODOLOGY.md` §8).
+All three must pass. If `verify` fails, **do not lower the threshold** — find out whether it is the implementation or the assertion that is wrong. Both have happened before (see `docs/en/methodology.md` §8).
 
 ## Commit messages
 

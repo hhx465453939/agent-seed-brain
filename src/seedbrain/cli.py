@@ -241,7 +241,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     def common(p: argparse.ArgumentParser) -> None:
         p.add_argument("--profile", help="profile JSON 路径（默认 ./seedbrain.json）")
-        p.add_argument("--root", help="知识库根目录（默认 profile 所在目录的父级）")
+        p.add_argument(
+            "--root",
+            help="知识库根目录（默认：profile 所在目录；父目录名为 profiles/ 时取其上一级）",
+        )
 
     p = sub.add_parser("build", help="解析全部源 → 等距平铺索引")
     common(p)

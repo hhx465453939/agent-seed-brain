@@ -7,7 +7,7 @@
     for m in brain.match("降维压缩，矩阵分解选型", k=5):
         print(m.total, m.seed.id, m.hits[:2])
 
-设计边界见 ``docs/METHODOLOGY.md`` 与 ``tasks/CHG-20261022-seed-brain-sdk/``。
+设计边界见 ``docs/en/methodology.md`` 与 ``tasks/CHG-20261022-seed-brain-sdk/``。
 """
 
 from __future__ import annotations

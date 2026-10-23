@@ -9,7 +9,11 @@
   <img alt="Status" src="https://img.shields.io/badge/status-source--available-FF2D78?style=flat-square&labelColor=0A0A0A">
 </p>
 
-<h3 align="center">把任意领域的知识，编译成智能体可<b>无偏检索</b>、可<b>增量演进</b>、可<b>自我验证</b>的「种子大脑」。</h3>
+<p align="center">
+  <b>English</b> · <a href="README.zh-CN.md">简体中文</a>
+</p>
+
+<h3 align="center">Compile any domain of knowledge into a seed index that agents can <b>retrieve without bias</b>, <b>evolve incrementally</b>, and <b>verify themselves</b>.</h3>
 
 <p align="center">
   <kbd>zero dependencies</kbd> · <kbd>deterministic</kbd> · <kbd>explainable</kbd> · <kbd>verifiable</kbd>
@@ -17,40 +21,56 @@
 
 ---
 
-## 它到底提升了什么
+## What it actually changes
 
-大多数 agent 在"选方案"这一步，靠的是**预训练语料里最高频的那几个词**。
-这就是为什么你让它做科技感海报，它永远给你赛博霓虹；让它做数值计算，它永远给你梯度下降。
+Most agents pick an approach by reaching for the **most frequent tokens in their
+pretraining corpus**. That is why "make a tech-style poster" always returns
+cyberpunk neon, and "do some numerics" always returns gradient descent.
 
-`seedbrain` 不提升模型的推理能力。它做的是另一件事：
+`seedbrain` does not improve reasoning. It does something else:
 
-> **把「选什么」从模型权重里搬出来，搬进一份可检索、可审计、可验证的数据里。**
+> **It moves "what to choose" out of the model weights and into data that can be
+> searched, audited, and verified.**
 
-| 环节 | 模型自己硬扛 | 有种子大脑 |
+| Stage | Model on its own | With a seed brain |
 |---|---|---|
-| **选什么** | 语料里最高频的那几个 | 全库等距平铺 + IDF 加权，低频但精确的条目也能被选中 |
-| **稳定性** | 同一模型不同会话给出不同答案 | 确定性打分：同输入必得同输出 |
-| **可解释** | 说不出为什么选它 | 每次输出命中信号与权重（`霓虹·4.3  长图·3.3`） |
-| **积累** | 会话结束即遗忘 | 增量池 + 状态记忆，越用越准 |
-| **防退化** | 无 | 28 项门槛断言 + CI，算法退化立刻红 |
+| **What to choose** | whatever is most frequent in the corpus | the whole library laid out flat + IDF weighting, so rare-but-precise entries still surface |
+| **Stability** | different answers across sessions | deterministic scoring: same input, same output |
+| **Explainability** | cannot say why | every result prints its hit signals and weights (`neon·4.3  long-image·3.3`) |
+| **Accumulation** | forgotten when the session ends | increment pool + state memory; it gets sharper with use |
+| **Anti-regression** | none | 28 threshold assertions in CI; algorithmic regressions turn red |
 
-## 为什么收益与 harness、模型规模无关
-
-这条因果链是项目的存在理由：
+## Why the gain is independent of harness and model size
 
 ```
-「选得对不对」   ← 由索引质量 + 匹配算法决定   ← 与模型无关
-「选完之后怎么做」← 由模型推理能力决定         ← 与模型有关
+"did we choose well"    ← index quality + matching algorithm  ← model-independent
+"what to do afterwards" ← model reasoning                     ← model-dependent
 ```
 
-`seedbrain` 只负责前半段。所以它在 **任何 harness（Claude Code / Codex / pi / 自建循环）、任何模型（强或弱）** 上的效果是一致的：
-弱模型从"瞎猜"变成"查到同样的候选集"，强模型从"选得还行"变成"选得可解释、可复现"。
+`seedbrain` only owns the first half. So on **any harness (Claude Code / Codex /
+pi / your own loop) and any model (strong or weak)** the effect is the same: a
+weak model stops guessing and starts receiving the same candidate set; a strong
+model goes from "reasonable pick" to "explainable, reproducible pick".
 
 ---
 
-## 安装
+## Install
 
-**① 从源码（当前可用，无需等 PyPI）**
+**① From PyPI**
+
+```bash
+pip install agent-seed-brain
+seedbrain --version
+```
+
+Isolated CLI instead of a library:
+
+```bash
+pipx install agent-seed-brain
+```
+
+**② From source** — needed if you want the bundled example domain, because
+`profiles/` and `tests/fixtures/` live in the repository, not in the wheel:
 
 ```bash
 git clone https://github.com/hhx465453939/agent-seed-brain
@@ -59,21 +79,7 @@ pip install -e .
 seedbrain --version
 ```
 
-**② 从 PyPI**
-
-```bash
-pip install agent-seed-brain
-```
-
-> 发布由 `.github/workflows/release.yml` 完成（Trusted Publishing / OIDC，不需要 API token），
-> 全链路幂等：验证 → 构建 → 发 PyPI（已存在的文件自动跳过）→ 建 GitHub Release（已存在则同步）。
->
-> - **正常发版**：把 `pyproject.toml` 的 `version` 改好，打 tag（`v0.4.0`）并推送即可。
->   流水线会先断言 tag 与包版本一致，不一致直接拒绝发布。
-> - **补发历史版本**：手动触发该 workflow，`tag` 填要补的版本（如 `v0.1.1`），
->   `publish` 决定是否同时发 PyPI。已存在的文件与 release 都会被跳过/更新，不会报错。
-
-**③ 零安装试用**
+**③ Zero install**
 
 ```bash
 git clone https://github.com/hhx465453939/agent-seed-brain
@@ -81,181 +87,171 @@ cd agent-seed-brain
 PYTHONPATH=src python examples/minimal.py
 ```
 
+> **Note on what ships in the wheel:** the engine, `seedbrain/data/base.json`,
+> and `seedbrain/data/probes/core.json`. So `builtin:base` and
+> `builtin:probes/core` work after a plain `pip install`; the example profile
+> does not. Full detail: [docs/en/getting-started.md §3](docs/en/getting-started.md#3-what-is-actually-inside-the-installed-package).
+
+### Release pipeline
+
+Publishing runs in `.github/workflows/release.yml` (Trusted Publishing / OIDC, no
+API token). The whole chain is idempotent: verify → build → publish to PyPI
+(existing files are skipped) → create a GitHub Release (existing ones are
+synced).
+
+- **Normal release:** bump `version` in `pyproject.toml`, tag `v0.4.0`, push.
+  The pipeline asserts the tag matches the package version and refuses otherwise.
+- **Backfill an old version:** dispatch the workflow with `tag` set (e.g.
+  `v0.1.1`). Existing files and releases are skipped or updated — never an error.
+
 ---
 
-## 部署到 agent harness
+## Quick start (the pip path)
 
-`seedbrain` 是**库 + CLI**，不绑定任何 harness。两种接法：
-
-**A. 当作命令行工具（最常见）**
-
-在 agent 的规则文件里加一句「选方案前先跑 `seedbrain match`」，它就会在执行前查库：
+The five-minute version. It is the one that works after `pip install`, and it is
+verified end to end.
 
 ```bash
-seedbrain match "科技感长图，深色底霓虹" \
+mkdir my-brain && cd my-brain && mkdir notes
+```
+
+Write `notes/methods.md` — any format you like, as long as the profile knows how
+to parse it:
+
+```markdown
+# Numerical Methods
+
+## Matrix & decomposition
+
+- **Matrix decomposition** · svd —— 奇异值分解，把矩阵拆成低秩结构，降维与压缩的通用手段
+- **Low-rank approximation** · truncated-svd —— 截断奇异值，只保留最大的若干个，用于压缩与去噪
+- **QR iteration** · qr —— QR 迭代求特征值，适合中小规模稠密矩阵
+- **PCA projection** · pca —— 主成分投影，用方差最大的方向做线性降维
+- **Randomized sketch** · sketch —— 随机投影草图，用低维嵌入近似原矩阵，降维压缩的近似加速
+
+## Optimization
+
+- **Gradient descent** · gd —— 沿负梯度方向迭代，最基础的一阶优化
+- **Newton step** · newton —— 用二阶信息校正步长，收敛快但需要 Hessian
+- **Conjugate gradient** · cg —— 共轭方向法，解大型稀疏线性系统
+- **Backtracking line search** · backtracking —— 回溯线搜索，保证每步充分下降
+
+## Statistics
+
+- **Bootstrap CI** · resample —— 重采样估计置信区间，不依赖分布假设
+- **Jackknife** · leave-one-out —— 留一法估计偏差与方差
+- **Permutation test** · shuffle-test —— 置换检验，用打乱标签构造零分布
+```
+
+Write `seedbrain.json`:
+
+```json
+{
+  "extends": "builtin:base",
+  "name": "numerics",
+  "label": "Numerical Methods",
+  "sources": [
+    {
+      "kind": "table",
+      "path": "notes/methods.md",
+      "layer": "method",
+      "group_re": "^##\\s+(?P<group>[^#].*)$",
+      "entry_re": "^-\\s*\\*\\*(?P<name>[^*]+?)\\*\\*\\s*·\\s*(?P<tag>[^—]+?)\\s*——\\s*(?P<desc>.+)$"
+    }
+  ],
+  "layers": {
+    "method": { "prefix": "m", "quota": 1.0, "label": "Methods" }
+  },
+  "verify": {
+    "probes_ref": "builtin:probes/core",
+    "probes": ["降维压缩，矩阵分解选型"]
+  }
+}
+```
+
+Build and query:
+
+```bash
+seedbrain build --profile seedbrain.json
+seedbrain match "降维压缩，矩阵分解选型" --profile seedbrain.json --k 5
+```
+
+```
+ #  层              得分    新颖  id                         命中信号
+─────────────────────────────────────────────────────────────────────────
+ 1  method        4.9  1.00  m-randomized-sketch        压缩·1.4  矩阵·1.4  降维压·0.7
+ 2  method        4.4  1.00  m-matrix-decomposition     分解·1.9  压缩·1.4  降维·1.4  矩阵·1.4
+```
+
+Prove it:
+
+```bash
+seedbrain verify --profile seedbrain.json     # 27/27 on this example
+```
+
+(`27`, not `28`: `T9` requires a `verify.legacy_shelf`, and it is skipped rather
+than faked when absent. Very small corpora fail `T5` by design — four distinct
+top-1 picks across six runs needs more than three entries.)
+
+→ Full walkthrough, troubleshooting, uninstall:
+[docs/en/getting-started.md](docs/en/getting-started.md)
+
+---
+
+## Use it from an agent
+
+`seedbrain` is a **library + CLI** and binds to no harness. Two integrations:
+
+**A. As a CLI in the agent's rule file**
+
+Add: "before choosing an approach, run `seedbrain match`".
+
+```bash
+seedbrain match "tech-style long image, dark background, neon" \
   --profile profiles/taste.json \
   --root ~/agent-taste-seed-system \
   --k 8
 ```
 
-**B. 当作库嵌入自建循环**
+**B. As a library inside your own loop**
 
 ```python
 from seedbrain import SeedBrain
 
-brain = SeedBrain.load("profiles/taste.json", root="~/agent-taste-seed-system")
-for m in brain.match(task, k=8):
-    ...
-```
-
-**接上已有的知识库（SDK 与内容分离）**
-
-```bash
-seedbrain build  --profile profiles/taste.json --root ~/agent-taste-seed-system
-seedbrain verify --profile profiles/taste.json --root ~/agent-taste-seed-system
-```
-
-`--root` 指向**内容所在的仓库**。SDK 仓库里只有解析规则，不含任何种子内容——这是许可隔离的前提。
-
----
-
-## 30 秒
-
-```bash
-pip install agent-seed-brain
-```
-
-```python
-from seedbrain import SeedBrain
-
-brain = SeedBrain.load("profiles/example.json")   # 仓库内自带最小示例域
-brain.build()
+brain = SeedBrain.load("seedbrain.json")
+if not brain.seeds:
+    brain.build()
 
 for m in brain.match("降维压缩，矩阵分解选型", k=5):
-    print(f"{m.total:6.1f}  {m.seed.id:<24} {m.hits[:2]}")
-#    6.5  tl-矩阵分解               (('矩阵', 1.8), ('阵分', 1.8))
-#    4.1  tl-奇异值截断             (('降维', 1.8), ('压缩', 1.8))
+    print(f"{m.total:6.1f}  {m.seed.id:<28} {m.hits[:2]}")
+
+brain.pick("m-matrix-decomposition", score=5, note="one shot")
 ```
 
-想先看它体检？
-
-```bash
-seedbrain verify --profile profiles/example.json
-```
+`--root` points at **the repository where the content lives**. The SDK repository
+holds only parsing rules, never seed content — that separation is the
+precondition for license isolation.
 
 ---
 
-## 它治的三个真实病灶
+## Add your own domain
 
-<table>
-<tr><td width="33%" valign="top">
-
-**① 首选表只有十几行**
-
-人工写的"快速索引"结构性地让库里绝大多数条目**永远没有入口**。不是作者偏，是入口太窄。
-
-</td><td width="33%" valign="top">
-
-**② 同一个任务反复命中同一条**
-
-没有状态记忆，模型每次都在同一批高频项里打转。
-
-</td><td width="34%" valign="top">
-
-**③ 改了库忘了重建索引**
-
-检索层继续返回旧快照，新条目永远召不回来，**且不报错**。
-
-</td></tr>
-</table>
-
----
-
-## 四个机制（都不靠随机）
-
-| 机制 | 治什么 | 数学形式 |
-|---|---|---|
-| **IDF 加权** | 低频但精确的信号被高频通用词淹没 | `log(1 + N/(1+df))` |
-| **跨层配额** | 条目多的层把条目少的层挤成药渣 | 两阶段：先按层保底，再全局补满 |
-| **时间衰减** | 同一任务反复命中同一条 | `recovery × 次数惩罚`，14d 半衰，下限 0.15 |
-| **增量等价** | 新增会打乱旧 ID 与历史引用 | 只加后缀不改写；split-half 逐位等价 |
-
-**刻意不用随机数**：合适性由 IDF 决定（确定、可解释、可复现）；多样性由状态记忆产生——同一任务隔几天再跑，会拿到不同的**同等合适**候选，而不是随机的**不合适**候选。
-
----
-
-## 验证：它自己证明自己
-
-```bash
-seedbrain verify --profile profiles/example.json --evidence docs/EVIDENCE.md
-```
-
-```
-[PASS] T1a ID 唯一                  重复 0 个
-[PASS] T2a 名字自召回@8              100.0%（漏 0）
-[PASS] T3a 命中基尼系数               0.154
-[PASS] T4a IDF 单调性                df=1「假设」2.48 vs df=19「信号」0.74
-[PASS] T5  6 次连选的 top1 多样性      4 个不同
-[PASS] T6a 层饥饿（有货却没给位）        0 次
-[PASS] T9  top1 落在旧货架之外         50.0%
-[PASS] T10 增量等价                 22/22 逐位一致
-[PASS] T13 同义别名被识别             命中 cd-sampling（1.00）
-...
-结果：28/28 通过
-```
-
-配套 **91 个单元/集成测试**（标准库 `unittest`，不装任何东西就能跑）：
-
-```bash
-PYTHONPATH=src python -m unittest discover -s tests
-```
-
-> 断言是真的会失败的。本项目在开发期就被自己的断言抓出过两个真 bug：
-> 「配额只有上限没有下限」（弱层有货却拿不到位）、「novelty 下限乘完次数惩罚掉到 0.11」（复现失效）。
-
----
-
-## 生产实例：美学大脑
-
-<a href="https://github.com/hhx465453939/agent-taste-seed-system"><img src="https://img.shields.io/badge/agent--taste--seed--system-美学大脑-FF2D78?style=flat-square&labelColor=0A0A0A"></a>
-
-[`agent-taste-seed-system`](https://github.com/hhx465453939/agent-taste-seed-system) 用这套引擎管理 **24 章 250+ 艺术家的风格种子库**（352 粒章档 + 12 张代码基因卡 + 10 份情绪档）。
-
-它解决的问题是：不同视觉任务老是收敛到赛博霓虹 / 瑞士平面那几粒。
-
-接入后的实测：
-
-| 指标 | 数值 |
-|---|---|
-| top1 落在「旧首选表」之外 | **62.5%**（15/24 任务） |
-| top1 自身多样性 | 21/24 个不同 |
-| IDF 开/关 的 top1 命中率 | **100% vs 11.5%** |
-| 同一任务连选 6 次的不同 top1 | 6 个 |
-
-> SDK 与内容严格分离：本仓库只有引擎与解析规则，**一根种子都不打包**。
-> 美学大脑的语料在它自己的仓库里，遵循 CC BY-NC-SA 4.0；本仓库同样采用
-> CC BY-NC-SA 4.0，但两者是各自独立的版权客体。
-
----
-
-## 接入你自己的领域
-
-一个领域 = 一份 JSON。**不写一行 Python。**
+One domain = one JSON file. **No Python.**
 
 ```jsonc
 {
-  "schema_version": 1,
+  "extends": "builtin:base",          // shared norms, paths, thresholds
   "name": "my-domain",
   "sources": [
     {
-      "kind": "table",                       // 单行速查总库
+      "kind": "table",                // many entries in one file
       "path": "docs/methods.md",
       "layer": "method",
       "group_re": "^##\\s+(?P<group>.*)$",
       "entry_re": "^-\\s*\\*\\*(?P<name>[^*]+?)\\*\\*\\s*·\\s*(?P<tag>[^—]+?)\\s*——\\s*(?P<desc>.+)$"
     },
     {
-      "kind": "card",                        // 一张卡一粒种子
+      "kind": "card",                 // one file per entry
       "dir": "docs/cards",
       "layer": "card",
       "title_re": "^#\\s+(?P<title>.+)$",
@@ -265,125 +261,197 @@ PYTHONPATH=src python -m unittest discover -s tests
   "layers": {
     "method": { "prefix": "m",  "quota": 0.6 },
     "card":   { "prefix": "cd", "quota": 0.4 }
-  },
-  "paths": {
-    "index_jsonl": ".seedbrain/index.jsonl",
-    "index_md":    ".seedbrain/SEED-INDEX.md",
-    "additions":   ".seedbrain/additions.jsonl",
-    "state":       ".seedbrain/state.json"
   }
 }
 ```
 
-```bash
-seedbrain build  --profile my-domain.json
-seedbrain match  "你的任务描述" --profile my-domain.json
-seedbrain verify --profile my-domain.json
-```
-
-**只写差异：`extends` 继承**
-
-公共参数（`norms` / `paths` / 阈值）放进 `profiles/base.json`，领域 profile 只写差异：
-
-```jsonc
-{
-  "extends": "base.json",
-  "name": "my-domain",
-  "sources": [ /* 本域特有 */ ],
-  "layers":  { /* 本域特有 */ },
-  "verify":  { "probes": [ /* list 整体替换 */ ] }
-}
-```
-
-合并规则只有两条：**dict 递归合并，list 与标量整体替换**。
-（list 不合并，是因为「想清空从 base 继承来的 probes」必须能表达。）
-
-**探针也能复用：`probes_ref`**
-
-`verify.probes` 是 list，按上表规则会被**整体替换** —— 所以它不能用 `extends` 继承。
-探针复用走独立字段：
+Merge rules are exactly two: **dicts merge recursively, lists and scalars are
+replaced**. That is why probes have their own field:
 
 ```jsonc
 {
   "verify": {
-    "probes_ref": "builtin:probes/core",           // 引用公共池（池在前）
-    "probes": ["本域特有任务 1", "本域特有任务 2"]   // 追加（本域在后）
+    "probes_ref": "builtin:probes/core",        // pool first
+    "probes": ["domain-specific one", "two"]    // local second
   }
 }
 ```
 
-`builtin:` 前缀解析到 SDK 包内 `seedbrain/data/`，所以领域仓库不用复制任何文件：
+`builtin:` resolves inside the installed package, so a domain repository can
+reference shared config with **zero copies, zero drift**, tracking the SDK
+version.
 
-```jsonc
-{ "extends": "builtin:base" }
-```
-
-这是跨仓库引用的正解 —— **零复制、零漂移、随 SDK 版本走**。
-
-看不明白某个值从哪来？
+Not sure where a value came from?
 
 ```bash
-seedbrain config --profile my-domain.json --chain   # 继承链：谁是父
-seedbrain config --profile my-domain.json           # 合并后的最终配置
+seedbrain config --profile my-domain.json --chain   # inheritance chain
+seedbrain config --profile my-domain.json           # final merged config
 ```
 
-细节见 [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md)。
+→ Full field reference: [docs/en/profiles.md](docs/en/profiles.md)
 
 ---
 
-## 运行时新增（不改源文件）
+## Three real failure modes it fixes
 
-```bash
-seedbrain add \
-  --name "共形 PID 控制" \
-  --layer method \
-  --signals "在线控制,分布漂移,覆盖率保证" \
-  --ref docs/methods.md
-```
+<table>
+<tr><td width="33%" valign="top">
 
-写入增量池 → 自动重建 → **立即可检索**。三道护栏：`ref` 必须真实存在（防静默断链）、同层查重（包含度 ≥0.75）、ID 撞车只加后缀不改写。
+**① The shortlist has twelve rows**
+
+A hand-written "quick index" structurally leaves most of the library **with no
+entry point at all**. Not author bias — the door is too narrow.
+
+</td><td width="33%" valign="top">
+
+**② The same task keeps hitting the same entry**
+
+No state memory, so the model circles inside the same high-frequency set.
+
+</td><td width="34%" valign="top">
+
+**③ The library changed, the index did not**
+
+Retrieval keeps serving a stale snapshot, new entries are unreachable, **and
+nothing reports an error**.
+
+</td></tr>
+</table>
+
+## Four mechanisms (none of them random)
+
+| Mechanism | Fixes | Math |
+|---|---|---|
+| **IDF weighting** | rare-but-precise signals drowned by common words | `log(1 + N/(1+df))` |
+| **Cross-layer quota** | large layers squeezing small ones out of `top-K` | two phases: guarantee per layer, then fill globally |
+| **Time decay** | the same task re-hitting the same entry | `recovery × count penalty`, 14-day half-life, floor 0.15 |
+| **Increment equivalence** | new entries shuffling old IDs and references | append-only suffixes; split-half bitwise equivalence |
+
+**Deliberately no randomness**: suitability is decided by IDF (deterministic,
+explainable, reproducible); diversity comes from state memory — the same task a
+few days later returns different *equally suitable* candidates, not random
+*unsuitable* ones.
+
+→ Derivations, trade-offs, and known limits: [docs/en/methodology.md](docs/en/methodology.md)
 
 ---
 
-## 许可
+## Verification: it proves itself
 
-| 资产 | 许可 |
+```bash
+seedbrain verify --profile profiles/example.json
+seedbrain verify --profile profiles/example.json --evidence reports/verify.md
+```
+
+```
+[PASS] T1a ID uniqueness              duplicates 0
+[PASS] T2a name self-recall@8         100.0%
+[PASS] T3a hit Gini                   0.154
+[PASS] T4a IDF monotonicity           df=1 "hypothesis" 2.48 vs df=19 "signal" 0.74
+[PASS] T5  top-1 diversity over 6     4 distinct
+[PASS] T6a layer starvation           0
+[PASS] T9  top-1 outside old shelf    50.0%
+[PASS] T10 increment equivalence      22/22 bitwise
+...
+result: 28/28 passed
+```
+
+**107 unit/integration tests**, standard-library `unittest` only — nothing to
+install:
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests
+```
+
+> The assertions can actually fail. During development they caught two real bugs
+> in this project itself: a quota with an upper bound but no lower bound, and a
+> novelty floor that dropped to 0.11 after the count penalty.
+
+→ Assertion groups, exit codes, CI recipes: [docs/en/usage.md](docs/en/usage.md)
+
+---
+
+## Production instance: the aesthetic brain
+
+<a href="https://github.com/hhx465453939/agent-taste-seed-system"><img src="https://img.shields.io/badge/agent--taste--seed--system-aesthetic%20brain-FF2D78?style=flat-square&labelColor=0A0A0A"></a>
+
+[`agent-taste-seed-system`](https://github.com/hhx465453939/agent-taste-seed-system)
+uses this engine to manage a style library of **24 chapters and 250+ artists**
+(352 chapter entries + 12 code-genre cards + 10 mood profiles).
+
+The problem it solved: different visual tasks kept converging on the same handful
+of cyberpunk-neon / Swiss-typography entries.
+
+| Metric | Value |
 |---|---|
-| 本仓库代码（`src/`、`examples/`） | **CC BY-NC-SA 4.0** |
-| `profiles/*.json` | CC BY-NC-SA 4.0（**只有解析规则，无种子内容**） |
-| `tests/fixtures/` | CC BY-NC-SA 4.0（自写中性示例） |
-| 名称「seed brain / 种子大脑」与 banner | **保留所有权利**（不在许可范围内） |
-| 上游美学大脑的种子文本 | CC BY-NC-SA 4.0（**不在本仓库**） |
+| top-1 outside the old shortlist | **62.5%** (15/24 tasks) |
+| distinct top-1 picks | 21/24 |
+| top-1 hit rate, IDF on vs off | **100% vs 11.5%** |
+| distinct top-1 across 6 consecutive runs of one task | 6 |
 
-**这是 source-available，不是 OSI 认可的开源软件**（NC / SA 条款与开源定义不兼容）。
-完整条款见 [`LICENSE`](LICENSE)，权利保留与来源说明见 [`NOTICE`](NOTICE)。
-
-### 商业使用
-
-本项目采用**非商业**许可。以下情形需要单独的商业授权：
-
-- 集成进付费产品、SaaS、或企业内部生产系统
-- 用它提供咨询、外包、培训等收费服务
-- 在闭源产品中分发或嵌入
-
-授权方式：开一个标题为 `commercial license` 的 issue 即可开始沟通。
-贡献者已授予维护者再许可权（见 [`CONTRIBUTING.md`](CONTRIBUTING.md)），
-因此单份商业许可可以覆盖整个代码库。
-
-> 非商业用途（学习、研究、个人项目、非营利项目）无需授权，直接使用即可。
+> SDK and content are strictly separated: this repository ships the engine and
+> parsing rules, **not a single seed**. The aesthetic corpus lives in its own
+> repository under CC BY-NC-SA 4.0; this repository is also CC BY-NC-SA 4.0, but
+> they are separate copyright objects.
 
 ---
 
-## 路线图
+## Documentation
 
-- [x] v0.1.0 — 等距平铺 / IDF 匹配 / 跨层配额 / 状态衰减 / 增量池 / 28 项断言 / CLI + 库 API
-- [ ] v0.2.0 — profile 继承（领域公共配置复用）
-- [ ] v0.3.0 — 可选向量后端（保持零依赖默认路径不变）
-- [ ] v1.0.0 — API 冻结 + 迁移指南
+| Topic | English | 简体中文 |
+|---|---|---|
+| Install, first index, troubleshooting | [getting-started](docs/en/getting-started.md) | [快速上手](docs/zh-CN/getting-started.md) |
+| CLI + library API reference | [usage](docs/en/usage.md) | [使用参考](docs/zh-CN/usage.md) |
+| Profile schema, `extends`, `probes_ref` | [profiles](docs/en/profiles.md) | [Profile 参考](docs/zh-CN/profiles.md) |
+| Algorithm, trade-offs, known limits | [methodology](docs/en/methodology.md) | [方法论](docs/zh-CN/methodology.md) |
+| FAQ and troubleshooting | [faq](docs/en/faq.md) | [常见问题](docs/zh-CN/faq.md) |
+
+Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Changelog: [CHANGELOG.md](CHANGELOG.md)
+· Security: [SECURITY.md](SECURITY.md) · Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+---
+
+## License
+
+| Asset | License |
+|---|---|
+| Code (`src/`, `examples/`) | **CC BY-NC-SA 4.0** |
+| `profiles/*.json` | CC BY-NC-SA 4.0 (**parsing rules only, no seed content**) |
+| `tests/fixtures/` | CC BY-NC-SA 4.0 (hand-written neutral examples) |
+| The name "seed brain / 种子大脑" and the banner | **all rights reserved** (not covered) |
+| Upstream aesthetic corpus | CC BY-NC-SA 4.0 (**not in this repository**) |
+
+**This is source-available, not OSI-approved open source** (the NC/SA terms are
+incompatible with the open source definition). Full terms in [LICENSE](LICENSE);
+reservation of rights and attribution in [NOTICE](NOTICE).
+
+### Commercial use
+
+Non-commercial use (study, research, personal, non-profit) needs no permission.
+A separate commercial license is required for:
+
+- embedding it in a paid product, SaaS, or internal production system;
+- offering paid consulting, outsourcing, or training built on it;
+- distributing or embedding it inside a closed-source product.
+
+Start the conversation by opening an issue titled `commercial license`.
+Contributors grant the maintainer a relicensing right (see
+[CONTRIBUTING.md](CONTRIBUTING.md)), so one commercial license can cover the
+whole codebase.
+
+---
+
+## Roadmap
+
+- [x] v0.1.0 — flat layout / IDF matching / cross-layer quota / state decay / increment pool / 28 assertions / CLI + library API
+- [x] v0.2.0 — profile inheritance (`extends`) and `seedbrain config`
+- [x] v0.3.0 — composable probes (`probes_ref`) and `builtin:` package-relative references
+- [ ] v0.4.0 — optional vector backend (keeping the zero-dependency default path unchanged)
+- [ ] v1.0.0 — API freeze + migration guide
 
 ---
 
 <p align="center">
-  <sub>Built with <a href="https://github.com/hhx465453939/agent-taste-seed-system">aesthetic-brain</a> · 
+  <sub>Built with <a href="https://github.com/hhx465453939/agent-taste-seed-system">aesthetic-brain</a> ·
   CC BY-NC-SA 4.0 · source-available · zero runtime dependencies</sub>
 </p>
