@@ -69,18 +69,15 @@ Breaking changes get a `!` (`feat(core)!: ...`) and a `BREAKING CHANGE:` footer.
 
 ## Licensing
 
-This project is licensed under **CC BY-NC-SA 4.0** — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-Commercial use requires a separate written commercial license.
+This project is licensed under the **Apache License 2.0** — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 By submitting a pull request you agree that:
 
 1. You have the right to submit the contribution.
-2. Your contribution is licensed to this project under CC BY-NC-SA 4.0.
-3. **You grant the maintainer a perpetual, worldwide, royalty-free, irrevocable
-   license to relicense your contribution under any terms, including a
-   commercial license.** Without this, a single commercial license covering the
-   whole codebase would be impossible once outside contributions are merged.
-4. You do not add text, code, or data whose license forbids redistribution here.
+2. Your contribution is provided under the Apache License 2.0 (inbound = outbound).
+   No separate contributor license agreement is required, and no relicensing
+   right beyond Apache-2.0 is asked for.
+3. You do not add text, code, or data whose license forbids redistribution here.
 
 Do not paste text from other websites, books, or datasets unless you can point to
 a license that permits redistribution here.

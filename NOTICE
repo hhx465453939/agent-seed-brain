@@ -3,41 +3,31 @@ Copyright 2026 hhx465453939
 
 LICENSE
 
-This repository is licensed under the Creative Commons
-Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0).
-The full legal code is in the LICENSE file.
+This repository is licensed under the Apache License, Version 2.0.
+The full license text is in the LICENSE file, and the license text has
+not been modified. A copy of the license is also available at:
 
-You may, for non-commercial purposes:
-  - use, copy, and modify this software
-  - redistribute it, provided you keep the same license (ShareAlike)
-    and give appropriate attribution (Attribution)
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You may NOT, without a separate written commercial license:
-  - use it for commercial purposes
-  - sublicense it under different terms
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 
 WHAT THIS LICENSE DOES NOT COVER
 
-The following remain all rights reserved and are NOT licensed under CC BY-NC-SA 4.0:
+Apache License 2.0 grants copyright and patent rights (§3), but it does
+not grant trademark rights. The following remain all rights reserved:
 
   1. The names "agent-seed-brain", "seed brain", and "种子大脑";
-  2. The project banner (assets/banner.svg), any logo, and the visual identity;
-  3. Any patent rights. Creative Commons 4.0 licenses grant no patent rights,
-     and none are granted here, express or implied.
+  2. The project banner (assets/banner.svg), any logo, and the visual identity.
 
-You may not use the names or marks to endorse, promote, or imply affiliation
-with derivative works or services.
-
-
-COMMERCIAL LICENSING
-
-Commercial use requires a separate written license from the copyright holder
-(open an issue titled "commercial license" to start the conversation).
-
-Contributors grant the maintainer the right to relicense their contributions —
-see CONTRIBUTING.md, section "Licensing". That is what makes it possible to
-offer a single commercial license covering the entire codebase.
+Section 6 of the License permits nominative, descriptive use of the project
+name (for example, "built on agent-seed-brain"), but not use of the names or
+marks to endorse, promote, or imply affiliation with derivative works or
+services.
 
 
 PROVENANCE
@@ -45,18 +35,11 @@ PROVENANCE
 The algorithm code in this repository was originally developed by the copyright
 holder and released under MIT (in agent-taste-seed-system) and Apache License 2.0
 (in agent-math-seed-system). As the sole copyright holder of those files, the
-author relicenses them here under CC BY-NC-SA 4.0.
+author licenses them here under Apache License 2.0 as well.
 
 No curated seed content from agent-taste-seed-system is included in this
-repository. That corpus is licensed CC BY-NC-SA 4.0 by its own repository;
-obtain it there and comply with its terms.
+repository. That corpus is licensed by its own repository; obtain it there and
+comply with its terms.
 
 The files under profiles/ contain parsing rules and layer quotas only — no
 seed entries, no artist names, no curated descriptions.
-
-
-STATUS
-
-This is source-available software, not OSI-approved open source. The
-NonCommercial and ShareAlike terms are incompatible with the Open Source
-Definition. Please do not describe this project as "open source".

@@ -239,6 +239,7 @@ PyPI 与 GitHub Release 各 4 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0`�
 | 断言 | `verify` 28 项（示例域） |
 | Python | 3.9 – 3.13 |
 | 运行时依赖 | **0** |
-| 许可 | CC BY-NC-SA 4.0，source-available（**不是** OSI 开源） |
+| 许可 | Apache-2.0（OSI 认可的开源许可） |
 
-商业使用需要单独授权；贡献者已授予维护者再许可权（见 `CONTRIBUTING.md`）。
+贡献按 Apache-2.0 提供（inbound = outbound，无 CLA，见 `CONTRIBUTING.md`）。
+v0.3.x 及更早版本曾以 CC BY-NC-SA 4.0 发布，旧版本继续按其原始许可。
