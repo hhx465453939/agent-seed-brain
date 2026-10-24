@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-（尚无条目）
+### Changed
+
+- **版本治理写入治理文档**：`AGENTS.md` §六 + `CLAUDE.md` 明确版本号有 **4 处必须同时改**
+  （`pyproject.toml` / `__version__` / `CHANGELOG` 标题 / AGENTS 状态表），
+  并附上 0.5.0 漏改 `__version__` 导致补发 0.5.1 的事故记录与两条自检命令。
+- **归档语义写成规矩**：`AGENTS.md` §四新增 `tasks/archive/` 小节——存档内的许可、
+  版本、路径是当时状态，不改写；新决策先建 `tasks/CHG-*`，完成后移入 `archive/`。
+- **禁区补两条**：手改 `LICENSE` 正文（必须整份取自 apache.org）；改写
+  `tasks/archive/` 内的存档文件。
 
 ## [0.5.1] - 2026-10-24
 

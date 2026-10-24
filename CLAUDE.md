@@ -78,10 +78,24 @@ docs/en/*.md        docs/zh-CN/*.md
 
 ### 发布
 
-推 tag 即全自动。补发历史版本：
+版本号有**两处代码位置**，必须同时改 —— v0.5.0 就是漏了第二处，被迫补发 0.5.1：
+
+```
+pyproject.toml             [project].version    打包元数据 + release.yml 的 tag 断言
+src/seedbrain/__init__.py  __version__          seedbrain --version / verify 证据头
+```
+
+发版前两条命令必须报同一个号：
 
 ```bash
-gh workflow run release.yml --ref main -f tag=v0.1.1 -f publish=true
+python -m seedbrain.cli --version
+grep -m1 '^version' pyproject.toml
+```
+
+推 tag 即全自动（verify → build → PyPI → GitHub Release）。补发历史版本：
+
+```bash
+gh workflow run release.yml --ref main -f tag=vX.Y.Z -f publish=true
 ```
 
 幂等，不会因 PyPI 已存在而报错。**不要**本地 `twine upload`。
@@ -106,4 +120,6 @@ gh workflow run release.yml --ref main -f tag=v0.1.1 -f publish=true
 - 别把 `tests/fixtures/` 的 diff 当作噪声清掉
 - 别引入任何第三方包，包括"只是开发期用"的断言类库（`dev` extras 除外）
 - 别把上游美学大脑的种子文本复制进来
+- 别只改 `pyproject.toml` 就发版（还有 `__version__`，见「发布」）
+- 别手改 `LICENSE` 正文或 `tasks/archive/` 里的存档
 - 别在 `docs/` 里新建单语文件

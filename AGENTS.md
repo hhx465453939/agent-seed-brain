@@ -123,6 +123,17 @@ docs/en/             ↔  docs/zh-CN/
 `CHANGELOG.md`、`CONTRIBUTING.md`、`SECURITY.md`、`CODE_OF_CONDUCT.md`、`NOTICE`、
 `tasks/archive/` —— 单语（现状：CHANGELOG 中文，其余英文），不要求对齐。
 
+### 归档语义（`tasks/archive/`）
+
+`tasks/archive/` 是**历史存档**，不是当前规范：
+
+1. 文件内的**许可声明、版本号、路径都是当时的状态**，不代表当前事实。
+   例如存档里写「CC BY-NC-SA 4.0」是事实，因为那时确实是；当前许可以根目录
+   [`LICENSE`](LICENSE) 为准（Apache-2.0）。
+2. **不改写存档**。改写等于伪造决策记录 —— 这与「调低 verify 阈值」同类。
+3. 新决策开 `tasks/CHG-YYYYMMDD-<slug>/`，完成后**移入** `archive/`，不要直接建在 archive 里。
+4. 索引与「读之前必须知道什么」见 [`tasks/README.md`](tasks/README.md)。
+
 ### 术语
 
 | 中文 | English |
@@ -179,9 +190,36 @@ ci(release): 发布流水线幂等化
 verify → build → PyPI(skip-existing) → GitHub Release(存在则同步)
 ```
 
-1. 改 `pyproject.toml` 的 `version`
-2. 更新 `CHANGELOG.md`（把 `[Unreleased]` 落成新版本小节）
-3. `git tag v0.4.0 && git push origin v0.4.0`
+### 版本号出现在 2 个代码位置 + 2 个文档位置
+
+版本号不是「一个字段」，是**四处必须同时改**的契约：
+
+| 位置 | 字段 | 谁读它 |
+|---|---|---|
+| `pyproject.toml` | `[project].version` | 打包元数据；`release.yml` 用它断言 tag 一致 |
+| `src/seedbrain/__init__.py` | `__version__` | `seedbrain --version`、`verify` 生成的证据头、issue 里的版本回报 |
+| `CHANGELOG.md` | `## [X.Y.Z] - YYYY-MM-DD` | `release.yml` 从这里提取 Release notes |
+| `AGENTS.md` 本文 §六 + §九 | 发布状态表 / 当前状态表 | 人与 agent 读的现状 |
+
+发版前自检（两条命令必须都报同一个号）：
+
+```bash
+python -m seedbrain.cli --version                    # 来自 __version__
+grep -m1 '^version' pyproject.toml                   # 来自 [project].version
+```
+
+> **真实事故（v0.5.0）**：只改了 `pyproject.toml`，漏了 `__version__`。
+> 结果 PyPI 上的包是 0.5.0，`seedbrain --version` 却报 0.3.0；因为 PyPI 不可覆盖，
+> 只能补发 0.5.1。**只改一处就发版 = 发了个自称旧版本的包。**
+
+### 发版步骤
+
+1. 上表四处同步（`CHANGELOG.md` 把 `[Unreleased]` 落成 `## [X.Y.Z] - YYYY-MM-DD`）
+2. 本地跑完 `unittest` / `verify` / `ruff` / `build` 幂等
+3. `git tag vX.Y.Z && git push origin main && git push origin vX.Y.Z`
+
+流水线会断言 **tag ↔ 包版本一致**，不一致直接拒绝 —— 因为 PyPI 不允许覆盖同名文件，
+发错了只能 yank + 升版本。
 
 流水线会断言 **tag ↔ 包版本一致**，不一致直接拒绝 —— 因为 PyPI 不允许覆盖同名文件，
 发错了只能 yank + 升版本。
@@ -214,6 +252,8 @@ PyPI 与 GitHub Release 各 6 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0 /
 | 手改 `references/*.jsonl` / `SEED-INDEX.md` | 它们是生成产物；改源文件后 `build` |
 | 跳过 CHANGELOG 直接提交功能 | 发布时无版本说明可提取 |
 | 在运行时求值位置写类型联合语法（`X 竖线 Y`） | Python 3.9 会炸 |
+| 手改 `LICENSE` 正文（必须整份取自 apache.org） | 许可正文错一个字都是法律风险；正文要能逐字节与官方源核对 |
+| 改写 `tasks/archive/` 内的存档文件 | 那是带日期的决策记录，改写等于伪造历史 |
 
 ---
 
@@ -221,6 +261,7 @@ PyPI 与 GitHub Release 各 6 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0 /
 
 | 现象 | 根因 | 处理 |
 |---|---|---|
+| `seedbrain --version` 报旧版本号 | 只改了 `pyproject.toml`，漏了 `src/seedbrain/__init__.py` 的 `__version__` | 两处同步（§六）；v0.5.0 因此补发了 0.5.1 |
 | `源 '...' 解析出 0 条种子` | `entry_re` 里的破折号是**双**全角 `——`，源文件只写了单 `—` | 逐字符比对一行真实内容 |
 | `profile 不是合法 JSON` | JSON 里的正则写了单反斜杠 | 每个反斜杠写成 `\\` |
 | pip 安装后跑不了 `profiles/example.json` | wheel 只含引擎与 `data/`，示例 profile 属于仓库 | 用 `builtin:base` 自己写 profile，或从源码安装 |
