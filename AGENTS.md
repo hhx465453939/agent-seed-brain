@@ -197,7 +197,8 @@ gh workflow run release.yml --ref main -f tag=v0.1.1 -f publish=true
 
 ### 当前发布状态
 
-PyPI 与 GitHub Release 各 4 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0`，Latest = `0.3.0`。
+PyPI 与 GitHub Release 各 5 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0 / 0.5.0`，Latest = `0.5.0`。
+（从未发布 `0.4.0`：再许可直接跳到 `0.5.0`。）
 
 ---
 
@@ -234,7 +235,7 @@ PyPI 与 GitHub Release 各 4 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0`�
 
 | 项 | 值 |
 |---|---|
-| 版本 | `0.3.0`（PyPI 已发布） |
+| 版本 | `0.5.0`（PyPI 已发布） |
 | 测试 | 107 个 unittest |
 | 断言 | `verify` 28 项（示例域） |
 | Python | 3.9 – 3.13 |

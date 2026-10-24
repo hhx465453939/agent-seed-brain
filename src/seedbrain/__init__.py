@@ -18,7 +18,7 @@ from pathlib import Path
 from .models import BuildResult, Check, Match, Seed, Stats, VerifyReport
 from .profile import Profile, ProfileError
 
-__version__ = "0.3.0"
+__version__ = "0.5.0"
 __all__ = [
     "SeedBrain",
     "Seed",
