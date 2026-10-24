@@ -5,7 +5,7 @@
 
 **本文件是项目治理的唯一权威。**
 细节分别落在 [CONTRIBUTING.md](CONTRIBUTING.md)（贡献流程）、
-[docs/](docs/)（双语使用文档）、[tasks/](tasks/)（立项与决策存档）。
+[docs/](docs/)（双语使用文档）、[tasks/archive/](tasks/archive/)（立项与决策存档，已完成项归档于此）。
 冲突时以本文件为准。
 
 ---
@@ -121,7 +121,7 @@ docs/en/             ↔  docs/zh-CN/
 ### 不属于双轨的文件
 
 `CHANGELOG.md`、`CONTRIBUTING.md`、`SECURITY.md`、`CODE_OF_CONDUCT.md`、`NOTICE`、
-`tasks/` —— 单语（现状：CHANGELOG 中文，其余英文），不要求对齐。
+`tasks/archive/` —— 单语（现状：CHANGELOG 中文，其余英文），不要求对齐。
 
 ### 术语
 
@@ -197,8 +197,8 @@ gh workflow run release.yml --ref main -f tag=v0.1.1 -f publish=true
 
 ### 当前发布状态
 
-PyPI 与 GitHub Release 各 5 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0 / 0.5.0`，Latest = `0.5.0`。
-（从未发布 `0.4.0`：再许可直接跳到 `0.5.0`。）
+PyPI 与 GitHub Release 各 6 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0 / 0.5.0 / 0.5.1`，Latest = `0.5.1`。
+（从未发布 `0.4.0`：再许可直接跳到 `0.5.0`。`0.5.1` 仅修 `__version__` 字符串并归档 `tasks/`，无 API 变更。）
 
 ---
 
@@ -235,7 +235,7 @@ PyPI 与 GitHub Release 各 5 个版本对齐：`0.1.0 / 0.1.1 / 0.2.0 / 0.3.0 /
 
 | 项 | 值 |
 |---|---|
-| 版本 | `0.5.0`（PyPI 已发布） |
+| 版本 | `0.5.1`（PyPI 已发布） |
 | 测试 | 107 个 unittest |
 | 断言 | `verify` 28 项（示例域） |
 | Python | 3.9 – 3.13 |

@@ -72,7 +72,7 @@ jobs:
   # 混入一条批量条目会让两边的许可边界变得不可追溯，所以留最后一道防线。
   # 白名单里的文件可以提到这些词：
   #   README.md / README.zh-CN.md / CHANGELOG / NOTICE / CONTRIBUTING / docs —— 用于说明来源与边界
-  #   tasks/ —— 工程契约，记录决策与风险
+  #   tasks/archive/ —— 工程契约的历史存档，记录当时决策与风险
   #   profiles/ —— 只含【指向上游文件的路径】，是解析规则而非内容
   license-guard:
     name: 内容边界守卫

@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 （尚无条目）
 
+## [0.5.1] - 2026-10-24
+
+### Fixed
+
+- **`__version__` 与包版本不一致**：0.5.0 只改了 `pyproject.toml`，
+  `src/seedbrain/__init__.py` 里的 `__version__` 仍是 `0.3.0`，于是
+  `seedbrain --version` 与 `verify` 生成的文档头都报错版本。本版对齐到 `0.5.1`。
+  （`0.5.0` 的 PyPI 产物不可覆盖，其版本串问题由本版接替；安装请用 `0.5.1`。）
+
+### Changed
+
+- **`tasks/` 转为旧版归档**：两个已完成的变更契约移入 `tasks/archive/`，
+  新增 `tasks/README.md` 声明「文件内的许可、版本与路径是当时状态，不代表当前」。
+  CI 的 `license-guard` 白名单前缀 `tasks/` 不变，归档路径仍被覆盖。
+
 ## [0.5.0] - 2026-10-24
 
 ### Added

@@ -7,7 +7,7 @@
     for m in brain.match("降维压缩，矩阵分解选型", k=5):
         print(m.total, m.seed.id, m.hits[:2])
 
-设计边界见 ``docs/en/methodology.md`` 与 ``tasks/CHG-20261022-seed-brain-sdk/``。
+设计边界见 ``docs/en/methodology.md`` 与 ``tasks/archive/CHG-20261022-seed-brain-sdk/``。
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from pathlib import Path
 from .models import BuildResult, Check, Match, Seed, Stats, VerifyReport
 from .profile import Profile, ProfileError
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 __all__ = [
     "SeedBrain",
     "Seed",
