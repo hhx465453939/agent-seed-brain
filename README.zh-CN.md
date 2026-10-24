@@ -5,8 +5,8 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.9%20~%203.13-00E5C0?style=flat-square&labelColor=0A0A0A">
   <img alt="Dependencies" src="https://img.shields.io/badge/runtime%20deps-0-7B5CFF?style=flat-square&labelColor=0A0A0A">
   <img alt="Tests" src="https://img.shields.io/badge/tests-107%20passing-FF2D78?style=flat-square&labelColor=0A0A0A">
-  <img alt="License" src="https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-0A0A0A?style=flat-square&labelColor=FFFFFF">
-  <img alt="Status" src="https://img.shields.io/badge/status-source--available-FF2D78?style=flat-square&labelColor=0A0A0A">
+  <img alt="License" src="https://img.shields.io/badge/license-Apache_2.0-blue?style=flat-square&labelColor=FFFFFF">
+  <img alt="Status" src="https://img.shields.io/badge/status-open--source-2EA44F?style=flat-square&labelColor=0A0A0A">
 </p>
 
 <p align="center">
@@ -375,8 +375,8 @@ PYTHONPATH=src python -m unittest discover -s tests
 | 同一任务连选 6 次的不同 top1 | 6 个 |
 
 > SDK 与内容严格分离：本仓库只有引擎与解析规则，**一根种子都不打包**。
-> 美学大脑的语料在它自己的仓库里，遵循 CC BY-NC-SA 4.0；本仓库同样采用
-> CC BY-NC-SA 4.0，但两者是各自独立的版权客体。
+> 美学大脑的语料在它自己的仓库里，适用那个仓库的许可；本仓库采用
+> Apache-2.0。两者是各自独立的版权客体。
 
 ---
 
@@ -397,29 +397,26 @@ PYTHONPATH=src python -m unittest discover -s tests
 
 ## 许可
 
+**Apache License 2.0** —— 覆盖整个仓库，不再按资产类型分治。
+
 | 资产 | 许可 |
 |---|---|
-| 本仓库代码（`src/`、`examples/`） | **CC BY-NC-SA 4.0** |
-| `profiles/*.json` | CC BY-NC-SA 4.0（**只有解析规则，无种子内容**） |
-| `tests/fixtures/` | CC BY-NC-SA 4.0（自写中性示例） |
-| 名称「seed brain / 种子大脑」与 banner | **保留所有权利**（不在许可范围内） |
-| 上游美学大脑的种子文本 | CC BY-NC-SA 4.0（**不在本仓库**） |
+| 本仓库代码（`src/`、`examples/`） | **Apache-2.0** |
+| `profiles/*.json` | Apache-2.0（**只有解析规则，无种子内容**） |
+| `tests/fixtures/` | Apache-2.0（自写中性示例） |
+| 名称「seed brain / 种子大脑」与 banner | **保留所有权利**（商标与视觉识别，不在许可范围内） |
+| 上游美学大脑的种子文本 | **不在本仓库** —— 适用其自身仓库的许可 |
 
-**这是 source-available，不是 OSI 认可的开源软件**（NC / SA 条款与开源定义不兼容）。
-完整条款见 [LICENSE](LICENSE)，权利保留与来源说明见 [NOTICE](NOTICE)。
+完整条款见 [LICENSE](LICENSE)，署名与保留标识见 [NOTICE](NOTICE)。
 
-### 商业使用
+### 版本轨迹：v0.5.0 起再许可
 
-非商业用途（学习、研究、个人项目、非营利项目）无需授权，直接使用即可。以下情形
-需要单独的商业授权：
+**v0.3.x 及更早**版本以 **CC BY-NC-SA 4.0**（非商业 + 相同方式共享）发布，
+这些旧版本继续适用其原始许可 —— 已经授予的许可不可撤销。
+**自 v0.5.0 起整个仓库以 Apache-2.0 提供**，这是 OSI 认可的开源许可：
+商业使用、修改与再分发均被允许，仅需遵守其署名与 NOTICE 要求。
 
-- 集成进付费产品、SaaS、或企业内部生产系统；
-- 用它提供咨询、外包、培训等收费服务；
-- 在闭源产品中分发或嵌入。
-
-授权方式：开一个标题为 `commercial license` 的 issue 即可开始沟通。
-贡献者已授予维护者再许可权（见 [CONTRIBUTING.md](CONTRIBUTING.md)），因此单份商业
-许可可以覆盖整个代码库。
+从未发布过 v0.4.0；v0.5.0 直接跳到前面，路线图里的可选向量后端仍在待办。
 
 ---
 
@@ -435,5 +432,5 @@ PYTHONPATH=src python -m unittest discover -s tests
 
 <p align="center">
   <sub>Built with <a href="https://github.com/hhx465453939/agent-taste-seed-system">aesthetic-brain</a> ·
-  CC BY-NC-SA 4.0 · source-available · zero runtime dependencies</sub>
+  Apache-2.0 · 开源 · 零运行时依赖</sub>
 </p>

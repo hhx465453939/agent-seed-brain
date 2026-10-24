@@ -177,10 +177,11 @@ generation is for.
 
 ## Is commercial use allowed?
 
-No, not without a separate license. The code is **CC BY-NC-SA 4.0** — source
-available, not OSI open source. Non-commercial use (study, research, personal,
-non-profit) needs no permission. See `LICENSE` and `NOTICE`; commercial licensing
-starts by opening an issue titled `commercial license`.
+Yes. From v0.5.0 the whole repository is **Apache License 2.0** — an OSI-approved
+open source license that permits commercial use, modification, and redistribution,
+as long as you keep the copyright and NOTICE attribution and comply with the
+license terms. Versions up to and including v0.3.x were published under
+CC BY-NC-SA 4.0 and keep that license. See `LICENSE` and `NOTICE`.
 
 ---
 

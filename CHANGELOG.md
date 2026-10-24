@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+（尚无条目）
+
+## [0.5.0] - 2026-10-24
+
 ### Added
 
 - **`AGENTS.md` + `CLAUDE.md` 项目治理文档**：`AGENTS.md` 是唯一权威，包含五条硬
@@ -25,6 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **再许可为 Apache-2.0 —— 全仓库成为 OSI 开源**：从 CC BY-NC-SA 4.0 改为
+  Apache License 2.0（许可正文取自 apache.org 官方源，逐字未改；`NOTICE` 按
+  Apache-2.0 语境重写）。商业使用、修改、再分发均被允许，不再需要单独的
+  商业授权，也不再要求贡献者授予再许可权。**v0.3.x 及更早版本继续按其原始
+  许可** —— 已授予的许可不可撤销，旧 tag 与旧 Release 未做任何改动。
+- **PyPI 许可元数据同步**：`license` 改为 `Apache-2.0`，删除
+  `License :: Free for non-commercial use`，新增
+  `License :: OSI Approved :: Apache Software License`。采用 PEP 621 的 table
+  写法而非 PEP 639 字符串写法，以免把构建地板从 `setuptools>=61` 抬到 77。
 - **README 瘦身为「概览 + 可立即执行的命令」**，四个机制的推导、边界与排障细节
   下放到 `docs/`，README 只做引用。
 - **删除 `docs/METHODOLOGY.md`**：内容已双语化迁入

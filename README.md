@@ -5,8 +5,8 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.9%20~%203.13-00E5C0?style=flat-square&labelColor=0A0A0A">
   <img alt="Dependencies" src="https://img.shields.io/badge/runtime%20deps-0-7B5CFF?style=flat-square&labelColor=0A0A0A">
   <img alt="Tests" src="https://img.shields.io/badge/tests-107%20passing-FF2D78?style=flat-square&labelColor=0A0A0A">
-  <img alt="License" src="https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-0A0A0A?style=flat-square&labelColor=FFFFFF">
-  <img alt="Status" src="https://img.shields.io/badge/status-source--available-FF2D78?style=flat-square&labelColor=0A0A0A">
+  <img alt="License" src="https://img.shields.io/badge/license-Apache_2.0-blue?style=flat-square&labelColor=FFFFFF">
+  <img alt="Status" src="https://img.shields.io/badge/status-open--source-2EA44F?style=flat-square&labelColor=0A0A0A">
 </p>
 
 <p align="center">
@@ -391,8 +391,8 @@ of cyberpunk-neon / Swiss-typography entries.
 
 > SDK and content are strictly separated: this repository ships the engine and
 > parsing rules, **not a single seed**. The aesthetic corpus lives in its own
-> repository under CC BY-NC-SA 4.0; this repository is also CC BY-NC-SA 4.0, but
-> they are separate copyright objects.
+> repository and carries that repository's license; this repository is
+> Apache-2.0. They are separate copyright objects.
 
 ---
 
@@ -413,31 +413,29 @@ Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Changelog: [CHANGELOG.md](CH
 
 ## License
 
+**Apache License 2.0** — the whole repository, with no per-asset carve-outs.
+
 | Asset | License |
 |---|---|
-| Code (`src/`, `examples/`) | **CC BY-NC-SA 4.0** |
-| `profiles/*.json` | CC BY-NC-SA 4.0 (**parsing rules only, no seed content**) |
-| `tests/fixtures/` | CC BY-NC-SA 4.0 (hand-written neutral examples) |
-| The name "seed brain / 种子大脑" and the banner | **all rights reserved** (not covered) |
-| Upstream aesthetic corpus | CC BY-NC-SA 4.0 (**not in this repository**) |
+| Code (`src/`, `examples/`) | **Apache-2.0** |
+| `profiles/*.json` | Apache-2.0 (**parsing rules only, no seed content**) |
+| `tests/fixtures/` | Apache-2.0 (hand-written neutral examples) |
+| The name "seed brain / 种子大脑" and the banner | **all rights reserved** (trademark and visual identity — not covered) |
+| Upstream aesthetic corpus | **not in this repository** — licensed by its own repository |
 
-**This is source-available, not OSI-approved open source** (the NC/SA terms are
-incompatible with the open source definition). Full terms in [LICENSE](LICENSE);
-reservation of rights and attribution in [NOTICE](NOTICE).
+Full terms in [LICENSE](LICENSE); attribution and reserved marks in [NOTICE](NOTICE).
 
-### Commercial use
+### Version history: relicensed at v0.5.0
 
-Non-commercial use (study, research, personal, non-profit) needs no permission.
-A separate commercial license is required for:
+Versions up to and including **v0.3.x** were published under **CC BY-NC-SA 4.0**
+(non-commercial, share-alike). Those releases stay under their original license —
+a license already granted cannot be revoked. **From v0.5.0 the whole repository
+is Apache-2.0**, an OSI-approved open source license: commercial use,
+modification, and redistribution are permitted under its terms, with the usual
+attribution and NOTICE requirements.
 
-- embedding it in a paid product, SaaS, or internal production system;
-- offering paid consulting, outsourcing, or training built on it;
-- distributing or embedding it inside a closed-source product.
-
-Start the conversation by opening an issue titled `commercial license`.
-Contributors grant the maintainer a relicensing right (see
-[CONTRIBUTING.md](CONTRIBUTING.md)), so one commercial license can cover the
-whole codebase.
+There was never a v0.4.0 release; v0.5.0 jumps ahead of the optional vector
+backend still tracked in the roadmap.
 
 ---
 
@@ -453,5 +451,5 @@ whole codebase.
 
 <p align="center">
   <sub>Built with <a href="https://github.com/hhx465453939/agent-taste-seed-system">aesthetic-brain</a> ·
-  CC BY-NC-SA 4.0 · source-available · zero runtime dependencies</sub>
+  Apache-2.0 · open source · zero runtime dependencies</sub>
 </p>

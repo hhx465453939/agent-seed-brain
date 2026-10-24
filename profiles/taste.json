@@ -3,7 +3,7 @@
     "美学大脑（agent-taste-seed-system）的解析规则。",
     "本文件只含【如何解析】的规则与分层配额，不含任何种子内容。",
     "用法：seedbrain build --profile <本文件> --root <agent-taste-seed-system 仓库路径>",
-    "上游种子文本为 CC BY-NC-SA 4.0，不在本仓库分发。"
+    "上游种子文本适用其自身仓库的许可，不在本仓库分发。"
   ],
   "schema_version": 1,
   "name": "taste",

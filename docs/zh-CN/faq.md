@@ -155,10 +155,10 @@ seedbrain verify --profile x.json --json | sed -n '/^{/,$p' | jq .
 
 ## 允许商用吗？
 
-不允许，除非单独取得商业授权。代码是 **CC BY-NC-SA 4.0** —— source-available，
-不是 OSI 认可的开源软件。非商业用途（学习、研究、个人、非营利）无需授权。
-见 `LICENSE` 与 `NOTICE`；商业授权从开一个标题为 `commercial license` 的 issue
-开始沟通。
+允许。自 v0.5.0 起整个仓库采用 **Apache License 2.0** —— OSI 认可的开源许可，
+允许商业使用、修改与再分发，条件是保留版权与 NOTICE 署名并遵守许可条款。
+v0.3.x 及更早版本以 CC BY-NC-SA 4.0 发布，那些版本继续适用其原始许可。
+见 `LICENSE` 与 `NOTICE`。
 
 ---
 
